@@ -19,7 +19,7 @@ export const LoginForm = () => {
     try {
       const result = await login(credentials);
       console.log('Login successful:', result);
-      // Aquí podrías redirigir al usuario a otra página
+
     } catch (err) {
       console.error('Login failed:', err);
       setError(err.message || 'Error al iniciar sesión');

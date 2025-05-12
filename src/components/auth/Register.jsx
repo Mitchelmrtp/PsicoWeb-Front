@@ -29,7 +29,6 @@ export const RegisterForm = () => {
       const result = await register(userData);
       console.log('Registration successful:', result);
       setSuccess(true);
-      // Resetear el formulario después del registro exitoso
       setUserData({ email: '', password: '', name: '', first_name: '', last_name: '', telephone: '' });
     } catch (err) {
       console.error('Registration failed:', err);

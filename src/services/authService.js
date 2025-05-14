@@ -59,6 +59,30 @@ class AuthService {
         }
     }
 
+    async forgotPassword(email) {
+    try {
+        const response = await fetch(ENDPOINTS.FORGOT_PASSWORD, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al solicitar recuperación');
+        }
+
+            return data;
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            throw error;
+        }
+    }
+
+
     logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

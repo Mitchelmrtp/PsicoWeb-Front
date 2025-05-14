@@ -68,8 +68,18 @@ export const LoginForm = () => {
           {loading ? 'Cargando...' : 'Iniciar Sesión'}
         </Button>
         
-        <div className="text-center mt-4">
-          <p>¿No tienes una cuenta? <Link to="/register" className="text-blue-600 hover:underline">Regístrate aquí</Link></p>
+        <div className="text-center mt-4 text-sm">
+          <p>
+            ¿No tienes una cuenta?{' '}
+            <Link to="/register" className="text-blue-600 hover:underline">
+              Regístrate aquí
+            </Link>
+          </p>
+          <p className="mt-2">
+            <Link to="/forgot-password" className="text-blue-600 hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
         </div>
       </form>
     </div>

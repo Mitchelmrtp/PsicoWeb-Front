@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './hooks/useAuth';
 import { LoginForm } from './components/auth/Login';
 import { RegisterForm } from './components/auth/Register';
+import { ForgotPassword } from './components/auth/ForgotPassword';
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
@@ -50,6 +51,7 @@ const AppContent = () => {
             <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginForm />} />
             <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterForm />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           </Routes>
         </div>

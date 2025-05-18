@@ -4,6 +4,8 @@ import { useAuth } from './hooks/useAuth';
 import { LoginForm } from './components/auth/Login';
 import { RegisterForm } from './components/auth/Register';
 import { ForgotPassword } from './components/auth/ForgotPassword';
+import { PagPrincipal } from './components/auth/PagPrincipal';
+import { Disponibilidad } from './components/auth/Disponibilidad';
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
@@ -53,9 +55,20 @@ const AppContent = () => {
             <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterForm />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/PagPrincipal" element={user ? <Navigate to="/dashboard" /> : <PagPrincipal />} />
+            <Route path="/Disponibilidad" element={user ? <Navigate to="/dashboard" /> : <Disponibilidad />} />
+            
           </Routes>
+          
         </div>
       </div>
+      <div>
+        <Routes>
+          <Route path="/PagPrincipal" element={user ? <Navigate to="/dashboard" /> : <PagPrincipal />} />
+          <Route path="/Disponibilidad" element={user ? <Navigate to="/dashboard" /> : <Disponibilidad />} />
+        </Routes>
+      </div>
+      
     </Router>
   );
 };

@@ -36,18 +36,22 @@ export const Disponibilidad = () => {
                         </p>
                     </div>
                 ))}
-                <form onSubmit={handlePagPrincipal}>
+                {/* Aquí va tu calendario */}
+                <div id="calendar">
+                    {/* ...todo el contenido del calendario... */}
+                </div>
+            </div>
+            <div>
                     <Button
                         type="submit"
                         variant="primary"
                         className="auth-btn"
+                        onClick={handlePagPrincipal}
                     >
                         Regresar a la Página Principal
                     </Button>
-                </form>
             </div>
         </div>
     );
 };
 
-export default Disponibilidad;

@@ -44,6 +44,8 @@ export const RegisterForm = () => {
   };
 
   return (
+  <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
     <div className="w-full">
       <h2 className="text-2xl font-bold mb-6 text-center">Registro</h2>
       {success && (
@@ -121,5 +123,7 @@ export const RegisterForm = () => {
         </div>
       </form>
     </div>
+    </div>
+  </div>
   );
 };

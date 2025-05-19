@@ -30,6 +30,8 @@ export const ForgotPassword = () => {
   };
 
   return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
     <div className="w-full">
       <h2 className="text-2xl font-bold mb-6 text-center">Recuperar Contraseña</h2>
       {successMsg && (
@@ -68,5 +70,7 @@ export const ForgotPassword = () => {
         </div>
       </form>
     </div>
+    </div>
+  </div>
   );
 };

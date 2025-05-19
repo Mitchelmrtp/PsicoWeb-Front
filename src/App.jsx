@@ -47,28 +47,15 @@ const AppContent = () => {
   
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-          <Routes>
-            <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-            <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginForm />} />
-            <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterForm />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/PagPrincipal" element={user ? <Navigate to="/dashboard" /> : <PagPrincipal />} />
-            <Route path="/Disponibilidad" element={user ? <Navigate to="/dashboard" /> : <Disponibilidad />} />
-            
-          </Routes>
-          
-        </div>
-      </div>
-      <div>
-        <Routes>
-          <Route path="/PagPrincipal" element={user ? <Navigate to="/dashboard" /> : <PagPrincipal />} />
-          <Route path="/Disponibilidad" element={user ? <Navigate to="/dashboard" /> : <Disponibilidad />} />
-        </Routes>
-      </div>
-      
+      <Routes>
+          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
+          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginForm />} />
+          <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterForm />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/PagPrincipal" element={<PagPrincipal />} />
+          <Route path="/Disponibilidad" element={ <Disponibilidad />} />
+      </Routes>
     </Router>
   );
 };

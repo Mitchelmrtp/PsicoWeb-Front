@@ -17,7 +17,7 @@ export const PagPrincipal = () => {
 
     return (
         <div className="">
-            <div className="">
+            <div className="flex justify-between items-center px-8 py-6 bg-gray-50">
                 <h1 className="text-4xl font-extrabold text-gray-800">Bienvenido a PSICOWEB</h1>
                     <Button
                         type="submit"

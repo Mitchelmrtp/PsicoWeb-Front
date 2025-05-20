@@ -11,7 +11,7 @@ export const Disponibilidad = () => {
         {
           title: 'Disponible',
           start: new Date(2025, 4, 23, 10, 0),
-          end:   new Date(2025, 4, 23, 11, 0),
+          end:   new Date(2025, 4, 23, 12, 0),
         }
       ]
     },
@@ -28,10 +28,23 @@ export const Disponibilidad = () => {
         navigate('/PagPrincipal');
     };
 
+    const handleLogout = (e) => {
+        e.preventDefault();
+        navigate('/login');
+    };
+
     return (
         <div className="w-full min-h-screen bg-gray-50">
             <header className="flex items-center justify-between px-8 py-6">
                 <h1 className="text-4xl font-extrabold text-gray-800">DISPONIBILIDAD</h1>
+                <Button
+                        type="submit"
+                        variant="danger"
+                        className="auth-btn logout-btn"
+                        onClick={handleLogout}
+                    >
+                        Cerrar Sesión
+                    </Button>
             </header>
             <div className="flex flex-col items-center mt-12 ">
                 {perfiles.map((perfil, idx) => (

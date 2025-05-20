@@ -27,6 +27,7 @@ export default function MyCalendar({ events }) {
         max={maxTime}
         scrollToTime={minTime}
         style={{ height: '100%' }}
+        
       />
     </div>
   )

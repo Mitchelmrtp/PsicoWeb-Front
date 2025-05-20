@@ -21,7 +21,7 @@ export const PagPrincipal = () => {
                 <h1 className="text-4xl font-extrabold text-gray-800">Bienvenido a PSICOWEB</h1>
                     <Button
                         type="submit"
-                        variant="primary"
+                        variant="danger"
                         className="auth-btn logout-btn"
                         onClick={handleLogout}
                     >

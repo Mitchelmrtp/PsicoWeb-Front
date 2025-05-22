@@ -6,6 +6,13 @@ import { RegisterForm } from './components/auth/Register';
 import { ForgotPassword } from './components/auth/ForgotPassword';
 import { PagPrincipal } from './components/auth/PagPrincipal';
 import { Disponibilidad } from './components/auth/Disponibilidad';
+import TestsMenu from "./components/auth/TestMenu";
+import TestForm from "./components/auth/TestForm";
+
+
+
+
+
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {

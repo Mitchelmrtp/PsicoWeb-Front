@@ -8,6 +8,7 @@ import { PagPrincipal } from './components/auth/PagPrincipal';
 import { Disponibilidad } from './components/auth/Disponibilidad';
 import TestsMenu from "./components/auth/TestMenu";
 import TestForm from "./components/auth/TestForm";
+import ResetPassword from './components/auth/ResetPassword';
 
 
 
@@ -55,13 +56,14 @@ const AppContent = () => {
   return (
     <Router>
       <Routes>
-          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginForm />} />
-          <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterForm />} />
+          <Route path="/" element={user ? <Navigate to="/PagPrincipal" /> : <Navigate to="/login" />} />
+          <Route path="/login" element={user ? <Navigate to="/PagPrincipal" /> : <LoginForm />} />
+          <Route path="/register" element={user ? <Navigate to="/PagPrincipal" /> : <RegisterForm />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/PagPrincipal" element={<PagPrincipal />} />
           <Route path="/Disponibilidad" element={ <Disponibilidad />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

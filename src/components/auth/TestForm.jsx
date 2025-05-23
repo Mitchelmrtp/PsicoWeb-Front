@@ -7,7 +7,7 @@ const opciones = [
   { label: 'Casi siempre', value: 3 },
 ];
 
-const TestForm = ({ preguntas, onBack }) => {
+const TestForm = ({ preguntas, onBack, tipoTest }) => {
   const [respuestas, setRespuestas] = useState(Array(preguntas.length).fill(null));
   const [resultado, setResultado] = useState(null);
   const [puntajeTotal, setPuntajeTotal] = useState(null);
@@ -18,9 +18,7 @@ const TestForm = ({ preguntas, onBack }) => {
     setRespuestas(nuevasRespuestas);
   };
 
-  const calcularResultado = () => {
-    const total = respuestas.reduce((a, b) => a + b, 0);
-    setPuntajeTotal(total);
+  const calcularResultado = (total) => {
     if (total <= 10) return 'Bajo riesgo';
     if (total <= 20) return 'Riesgo moderado';
     return 'Alto riesgo';
@@ -32,24 +30,25 @@ const TestForm = ({ preguntas, onBack }) => {
       alert('Por favor responde todas las preguntas');
       return;
     }
-    const categoria = calcularResultado();
+
+    const total = respuestas.reduce((a, b) => a + b, 0);
+    setPuntajeTotal(total);
+    const categoria = calcularResultado(total);
     setResultado(categoria);
-  };
 
-  const buttonStyle = {
-    marginRight: '10px',
-    marginBottom: '10px',
-    padding: '8px 15px',
-    borderRadius: '6px',
-    border: '1px solid #007bff',
-    backgroundColor: '#007bff',
-    color: 'white',
-    cursor: 'pointer',
-    fontWeight: '600',
-  };
+    // ✅ Guardar resultados por usuario
+    const usuario = JSON.parse(localStorage.getItem("user"));
+    const email = usuario?.email || 'anonimo';
 
-  const labelStyle = {
-    display: 'inline-block',
+    const nuevoResultado = {
+      tipo: tipoTest,
+      puntaje: total,
+    };
+
+    const key = `resultadosTests_${email}`;
+    const resultadosPrevios = JSON.parse(localStorage.getItem(key)) || [];
+    resultadosPrevios.push(nuevoResultado);
+    localStorage.setItem(key, JSON.stringify(resultadosPrevios));
   };
 
   return (
@@ -69,25 +68,27 @@ const TestForm = ({ preguntas, onBack }) => {
       >
         ← Volver
       </button>
+
       {!resultado ? (
         <form onSubmit={handleSubmit}>
           {preguntas.map((pregunta, i) => (
-  <div key={i} style={{ marginBottom: '1rem' }}>
-    <p>{i + 1}. {pregunta}</p>
-    {opciones.map(opt => (
-      <label key={opt.value} style={{ marginRight: '15px' }}>
-        <input
-          type="radio"
-          name={`p${i}`}
-          value={opt.value}
-          onChange={() => handleChange(i, opt.value)}
-          required
-        />
-        {opt.label}
-      </label>
-    ))}
-  </div>
+            <div key={i} style={{ marginBottom: '1rem' }}>
+              <p>{i + 1}. {pregunta}</p>
+              {opciones.map(opt => (
+                <label key={opt.value} style={{ marginRight: '15px' }}>
+                  <input
+                    type="radio"
+                    name={`p${i}`}
+                    value={opt.value}
+                    onChange={() => handleChange(i, opt.value)}
+                    required
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
           ))}
+
           <button
             type="submit"
             style={{

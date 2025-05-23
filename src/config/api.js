@@ -4,6 +4,7 @@ export const ENDPOINTS = {
     LOGIN: `${API_URL}/login`,
     REGISTER: `${API_URL}/register`,
     FORGOT_PASSWORD: `${API_URL}/forgot-password`,
+    RESET_PASSWORD: `${API_URL}/reset-password`, // ← ✅ nuevo endpoint
     PROFILE: `${API_URL}/profile`
 };
 

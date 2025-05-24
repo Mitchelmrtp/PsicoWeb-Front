@@ -1,0 +1,85 @@
+/* Contenedor principal: ancho limitado y centrado */
+.calendar-container {
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Encabezado (días de la semana) */
+.rbc-header {
+  background-color: #f3fafc; /* celeste muy claro */
+  color: #1f2937;            /* gris oscuro */
+  font-weight: 600;
+  padding: 8px 0;
+  border-bottom: none !important;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Celdas de días fuera del mes actual */
+.rbc-off-range-bg {
+  background-color: #f9fafb;
+}
+
+/* Día actual */
+.rbc-today {
+  background-color: #e0f2fe !important;
+}
+
+/* Fondo de los días */
+.rbc-day-bg,
+.rbc-day-slot {
+  border: none;
+}
+
+/* Eventos */
+.calendar-container .rbc-event {
+  background-color: #0399b8 !important; /* azul evento */
+  border-radius: 10px !important;
+  color: rgb(0, 0, 0) !important;
+  padding: 2px 8px !important;
+  font-size: 0.65rem !important;
+  margin: 3px 10px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: default !important;
+  box-shadow: none !important;
+  max-width: 70%; /* Permite que el evento use el ancho del contenedor */
+}
+
+/* Quitar sombra y bordes de filas */
+.rbc-month-row,
+.rbc-row-segment {
+  border-bottom: 1px solid #eee;
+}
+
+/* Botón "+X more" */
+.rbc-show-more {
+  color: #2a81f4 !important;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.7rem;
+  padding: 0;
+  margin-top: 10px;
+  background: transparent !important;
+  border: none !important;
+  text-decoration: underline;
+}
+
+/* Hover para eventos */
+.calendar-container .rbc-event:hover {
+  background-color: #0277bd !important;
+  color: white !important;
+}
+
+/* Alineación central para todos los textos en días */
+.rbc-day-slot .rbc-event, .rbc-day-bg {
+  text-align: center;
+}

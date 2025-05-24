@@ -5,8 +5,6 @@ import {
   parse,
   startOfWeek as startOfWeekFn,
   getDay,
-  setHours,
-  setMinutes,
 } from 'date-fns'
 import es from 'date-fns/locale/es'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -22,33 +20,18 @@ const localizer = dateFnsLocalizer({
   locales,
 })
 
-export default function MyCalendar({ events, onSelectDate, components = {} }) {
-  const minTime = setHours(setMinutes(new Date(1970, 1, 1), 0), 8)
-  const maxTime = setHours(setMinutes(new Date(1970, 1, 1), 0), 20)
-
-  const handleSelectSlot = (slotInfo) => {
-    if (onSelectDate) {
-      onSelectDate(slotInfo.start)
-    }
-  }
-
+export default function MyCalendar({ events }) {
   return (
-    <div className="calendar-container mx-auto max-w-[480px] p-4" style={{ height: '600px' }}>
+    <div className="calendar-container mx-auto max-w-[480px] p-4" style={{ height: 600 }}>
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        defaultView="week"
-        views={['week', 'day']}
-        step={60}
-        timeslots={1}
-        min={minTime}
-        max={maxTime}
-        scrollToTime={minTime}
-        selectable
-        onSelectSlot={handleSelectSlot}
+        defaultView="month"
+        views={['month']}
         style={{ height: '100%' }}
+        dayLayoutAlgorithm="no-overlap"
         eventPropGetter={() => ({
           style: {
             backgroundColor: '#0399b8',
@@ -66,7 +49,6 @@ export default function MyCalendar({ events, onSelectDate, components = {} }) {
             justifyContent: 'center',
           },
         })}
-        components={components}
       />
     </div>
   )

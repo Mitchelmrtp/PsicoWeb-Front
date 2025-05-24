@@ -33,13 +33,13 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    const logout = useCallback(() => {
-        authService.logout();
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setUser(null);
-        setIsAuthenticated(false);
-    }, []);
+        setIsAuthenticated(false); // ✅ asegúrate de actualizar este estado también
+    };
 
-    // Verificar el estado de autenticación al cargar
     useEffect(() => {
         const storedUser = authService.getStoredUser();
         const isAuth = authService.isAuthenticated();

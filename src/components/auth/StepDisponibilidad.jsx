@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import MyCalendar from "../common/Calendar";
 import Button from "../common/Button";
+import { useNavigate } from "react-router-dom";
 
 const StepDisponibilidad = ({ onNext }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [descripcion, setDescripcion] = useState("");
+
+  const navigate = useNavigate();
 
   const horarios = [
     "08:00am",
@@ -66,7 +69,12 @@ const StepDisponibilidad = ({ onNext }) => {
   return (
     <div className="grid grid-cols-3 bg-white rounded-xl shadow-md p-8 gap-8">
       <div className="col-span-1 space-y-6 text-gray-700 border-r pr-8">
-        <button className="text-gray-600">← Volver</button>
+        <button
+          onClick={() => navigate("/PagPrincipal")}
+          className="text-gray-600"
+        >
+          ← Volver
+        </button>
         <p>👨‍⚕️ Dr. Steven John</p>
         <p>⏱️ 60 min</p>
         <p>💻 Sesión vía Zoom</p>

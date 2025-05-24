@@ -16,7 +16,6 @@ const StepDatosPago = ({ citaData, onBack, onConfirm }) => {
   return (
     <>
       <div className="grid grid-cols-3 bg-white rounded-xl shadow-md p-8 gap-8">
-        {/* Columna 1 - Info Doctor */}
         <div className="col-span-1 space-y-6 text-gray-700 border-r pr-8">
           <button onClick={onBack} className="text-gray-600">
             ← Volver
@@ -38,7 +37,6 @@ const StepDatosPago = ({ citaData, onBack, onConfirm }) => {
           </div>
         </div>
 
-        {/* Columnas 2 y 3 - Datos de cita y pago */}
         <div className="col-span-2 pl-8 space-y-6">
           <h2 className="text-xl font-semibold">Detalles de Cita</h2>
           <p>
@@ -103,7 +101,6 @@ const StepDatosPago = ({ citaData, onBack, onConfirm }) => {
         </div>
       </div>
 
-      {/* Modal de Confirmación */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white p-8 rounded-xl shadow-xl text-center space-y-4">

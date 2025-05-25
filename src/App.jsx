@@ -18,30 +18,13 @@ import ResetPassword from "./components/auth/ResetPassword";
 import ReservaCita from "./components/auth/reservaCita";
 import Disponibilidad from "./components/auth/Disponibilidad";
 import MainPage from "./pages/mainpage.jsx";
+import DashboardContainer from "./components/dashboard/DashboardContainer";
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
   return children;
-};
-
-// Componente de dashboard (placeholder)
-const Dashboard = () => {
-  const { user, logout } = useAuth();
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Bienvenido, {user.username}</h1>
-      <p className="mb-4">Has iniciado sesión correctamente.</p>
-      <button
-        onClick={logout}
-        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Cerrar sesión
-      </button>
-    </div>
-  );
 };
 
 // Wrapper para proveer el contexto de autenticación
@@ -67,34 +50,63 @@ const AppContent = () => {
         <Route
           path="/dashboard" 
           element={
-            user ? <PagPrincipal /> : <Navigate to="/login" />
+            <ProtectedRoute>
+              <DashboardContainer />
+            </ProtectedRoute>
           }
         />
         <Route
           path="/login"
-          element={user ? <Navigate to="/PagPrincipal" /> : <LoginForm />}
+          element={user ? <Navigate to="/dashboard" /> : <LoginForm />}
         />
         <Route
           path="/register"
-          element={user ? <Navigate to="/PagPrincipal" /> : <RegisterForm />}
+          element={user ? <Navigate to="/dashboard" /> : <RegisterForm />}
         />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
-          path="/dashboard"
+          path="/PagPrincipal"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <PagPrincipal />
             </ProtectedRoute>
           }
         />
-        <Route path="/PagPrincipal" element={<PagPrincipal />} />
         <Route path="/Form" element={<Form />} />
-        <Route path="/reserva" element={<ReservaCita />} />
-        <Route path="/disponibilidad" element={<Disponibilidad />} />
+        <Route 
+          path="/reserva" 
+          element={
+            <ProtectedRoute>
+              <ReservaCita />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/disponibilidad" 
+          element={
+            <ProtectedRoute>
+              <Disponibilidad />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/CrearPruebas" element={<CrearPruebas />} />
+        <Route 
+          path="/CrearPruebas" 
+          element={
+            <ProtectedRoute>
+              <CrearPruebas />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/mainpage" element={<MainPage />} />
-        <Route path="/testmenu" element={<TestsMenu />} />
+        <Route 
+          path="/testmenu" 
+          element={
+            <ProtectedRoute>
+              <TestsMenu />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </Router>
   );

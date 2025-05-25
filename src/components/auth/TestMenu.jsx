@@ -23,9 +23,9 @@ export default function TestsMenu({ onSelectTest }) {
   const [hovered, setHovered] = React.useState(null);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '40px' }}>
-      <h2 style={{ marginBottom: '25px' }}>Selecciona un test</h2>
-      {['depresion', 'ansiedad', 'bipolaridad'].map((test) => (
+    <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-3xl mb-8">
+      <h3 className="text-xl font-bold mb-4 text-gray-800">Selecciona un test</h3>
+      <div className="flex flex-wrap justify-center gap-4">{['depresion', 'ansiedad', 'bipolaridad'].map((test) => (
         <button
           key={test}
           style={hovered === test ? { ...buttonStyle, ...buttonHoverStyle } : buttonStyle}
@@ -36,8 +36,7 @@ export default function TestsMenu({ onSelectTest }) {
         >
           {`Test ${test.charAt(0).toUpperCase() + test.slice(1)}`}
         </button>
-      ))}
-    </div>
+      ))}</div></div>
   );
 }
 

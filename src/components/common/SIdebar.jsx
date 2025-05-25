@@ -18,14 +18,14 @@ const Sidebar = () => {
           <Home size={20} />
           <span>Inicio</span>
         </button>
-
-        <a
-          href="#"
-          className="flex items-center space-x-3 text-gray-700 hover:text-indigo-600"
+        <button
+          onClick={() => navigate("/Form")}
+          className="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 bg-transparent border-none cursor-pointer text-left"
+          type="button"
         >
           <FileText size={20} />
           <span>Tests</span>
-        </a>
+        </button>
         <a
           href="#"
           className="flex items-center space-x-3 text-gray-700 hover:text-indigo-600"

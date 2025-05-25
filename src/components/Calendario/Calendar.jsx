@@ -1,73 +1,97 @@
-import React from 'react'
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
-import {
-  format,
-  parse,
-  startOfWeek as startOfWeekFn,
-  getDay,
-  setHours,
-  setMinutes,
-} from 'date-fns'
-import es from 'date-fns/locale/es'
-import 'react-big-calendar/lib/css/react-big-calendar.css'
-import './CalendarCustom.css'
+import React from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'moment/locale/es';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-const locales = { es }
+moment.locale('es');
+const localizer = momentLocalizer(moment);
 
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: (date) => startOfWeekFn(date, { locale: es }),
-  getDay,
-  locales,
-})
-
-export default function MyCalendar({ events, onSelectDate, components = {} }) {
-  const minTime = setHours(setMinutes(new Date(1970, 1, 1), 0), 8)
-  const maxTime = setHours(setMinutes(new Date(1970, 1, 1), 0), 20)
-
-  const handleSelectSlot = (slotInfo) => {
-    if (onSelectDate) {
-      onSelectDate(slotInfo.start)
-    }
-  }
+const MyCalendar = ({ events = [], onSelectDate, onEventClick }) => {
+  // Custom event component that displays availability status with clear visual cues
+  const EventComponent = ({ event }) => {
+    return (
+      <div 
+        className={`${event.className || ''} text-xs p-1 rounded overflow-hidden transition-all cursor-pointer ${event.isAvailable ? 'hover:bg-green-300' : ''}`}
+        onClick={() => event.isAvailable && onEventClick && onEventClick(event)}
+      >
+        <div className="font-semibold">{event.title}</div>
+        {event.isAvailable && (
+          <div className="text-xs">
+            {moment(event.start).format('HH:mm')} - {moment(event.end).format('HH:mm')}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="calendar-container mx-auto max-w-[480px] p-4" style={{ height: '600px' }}>
+    <div className="h-96 p-1 bg-white rounded-lg border border-gray-200">
+      <div className="mb-2 text-xs text-right text-gray-500">
+        <span>Haga clic en un horario disponible para seleccionarlo</span>
+      </div>
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        defaultView="week"
-        views={['week', 'day']}
-        step={60}
-        timeslots={1}
-        min={minTime}
-        max={maxTime}
-        scrollToTime={minTime}
+        style={{ height: 'calc(100% - 20px)' }}
+        onSelectSlot={(slotInfo) => {
+          onSelectDate(slotInfo.start);
+        }}
+        onSelectEvent={(event) => {
+          if (onEventClick && event.isAvailable) onEventClick(event);
+        }}
         selectable
-        onSelectSlot={handleSelectSlot}
-        style={{ height: '100%' }}
-        eventPropGetter={() => ({
-          style: {
-            backgroundColor: '#0399b8',
-            borderRadius: '8px',
-            color: 'black',
-            padding: '4px 8px',
-            fontSize: '0.85rem',
-            marginBottom: '4px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            cursor: 'default',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-        })}
-        components={components}
+        views={['month', 'week', 'day']}
+        defaultView="week"
+        components={{
+          event: EventComponent
+        }}
+        messages={{
+          today: 'Hoy',
+          previous: 'Anterior',
+          next: 'Siguiente',
+          month: 'Mes',
+          week: 'Semana',
+          day: 'Día',
+          agenda: 'Agenda',
+          date: 'Fecha',
+          time: 'Hora',
+          event: 'Evento',
+          noEventsInRange: 'No hay horarios disponibles en este período'
+        }}
+        eventPropGetter={(event) => {
+          let style = {};
+          if (event.isAvailable) {
+            style = {
+              backgroundColor: '#16a34a', // Green for available
+              color: 'white',
+              borderRadius: '4px'
+            };
+          }
+          return { style };
+        }}
+        dayPropGetter={(date) => {
+          const today = new Date();
+          const isPast = date < today && 
+            !(date.getDate() === today.getDate() && 
+              date.getMonth() === today.getMonth() && 
+              date.getFullYear() === today.getFullYear());
+          
+          if (isPast) {
+            return {
+              className: 'bg-gray-100',
+              style: {
+                opacity: 0.6
+              }
+            };
+          }
+          return {};
+        }}
       />
     </div>
-  )
-}
+  );
+};
+
+export default MyCalendar;

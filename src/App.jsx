@@ -17,7 +17,7 @@ import { CrearPruebas} from "./components/test/CrearPruebas.jsx";
 import TestsMenu from "./components/test/TestMenu.jsx";
 import TestForm from "./components/test/TestForm.jsx";
 import ResetPassword from "./components/auth/ResetPassword";
-import ReservaCita from "./components/auth/reservaCita";
+import ReservaCita from "./components/sesion/ReservaCita.jsx";
 import Disponibilidad from "./components/Calendario/Disponibilidad.jsx";
 import MainPage from "./pages/mainpage.jsx";
 import DashboardContainer from "./components/dashboard/DashboardContainer";

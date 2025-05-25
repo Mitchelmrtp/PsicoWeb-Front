@@ -90,6 +90,28 @@ class DisponibilidadService {
       throw error;
     }
   }
+
+  async getPsicologoDisponibilidad(psicologoId) {
+    try {
+      const response = await fetch(`${ENDPOINTS.DISPONIBILIDAD}/psicologo/${psicologoId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al obtener disponibilidad del psicólogo');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error obteniendo disponibilidad del psicólogo:', error);
+      throw error;
+    }
+  }
 }
 
 export default new DisponibilidadService();

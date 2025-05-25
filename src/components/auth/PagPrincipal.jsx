@@ -31,7 +31,7 @@ export const PagPrincipal = () => {
 
   const handleDisponibilidad = () => navigate("/disponibilidad");
   const handleReserva = () => navigate("/reserva");
-  const handleCrearTest = () => navigate("/crear-test");
+  const handleCrearTest = () => navigate("/crearPruebas");
 
   const handleVerResultados = () => {
     const datosGuardados =
@@ -53,23 +53,14 @@ export const PagPrincipal = () => {
 
   if (!testSeleccionado) {
     return (
-      <div className="w-full min-h-screen bg-gray-100">
-        {/* Header */}
-        <header className="flex items-center justify-between px-8 py-6 bg-white shadow-sm border-b">
-          <h1 className="text-4xl font-bold text-gray-800">PÁGINA PRINCIPAL</h1>
-          <Button variant="danger" onClick={handleLogout}>
-            Cerrar Sesión
-          </Button>
-        </header>
+      <div className="w-full min-h-screen bg-gray-50">
 
-        {/* Main Layout */}
-        <div className="flex gap-6 p-6">
-          {/* Sidebar */}
+        <div className="flex gap-4 p-4 min-h-[600px]">
           <Sidebar />
 
-          {/* Contenido central */}
-          <div className="w-full flex flex-col items-center">
-            <h2 className="text-3xl font-semibold text-center text-indigo-700 mb-6">
+          {/* Contenido central que ocupa el ancho restante */}
+          <div className="flex-1 flex flex-col items-center">
+            <h2 className="text-3xl font-semibold text-center px-8 py-6 text-indigo-700 mb-6">
               Bienvenido a <span className="text-indigo-500 font-bold">PSICOWEB</span>
             </h2>
 

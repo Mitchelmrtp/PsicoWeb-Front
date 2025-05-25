@@ -11,6 +11,7 @@ import { RegisterForm } from "./components/auth/Register";
 import { ForgotPassword } from "./components/auth/ForgotPassword";
 import { PagPrincipal } from "./components/auth/PagPrincipal";
 import { Form } from "./components/auth/Form";
+import { CrearPruebas} from "./components/auth/CrearPruebas";
 import TestsMenu from "./components/auth/TestMenu";
 import TestForm from "./components/auth/TestForm";
 import ResetPassword from "./components/auth/ResetPassword";
@@ -86,6 +87,7 @@ const AppContent = () => {
         <Route path="/reserva" element={<ReservaCita />} />
         <Route path="/disponibilidad" element={<Disponibilidad />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/CrearPruebas" element={<CrearPruebas />} />
       </Routes>
     </Router>
   );

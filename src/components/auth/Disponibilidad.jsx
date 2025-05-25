@@ -26,7 +26,7 @@ const Disponibilidad = () => {
       start: new Date(2025, 4, 23, 18, 0),
       end: new Date(2025, 4, 23, 19, 0),
     },
-        {
+    {
       title: '1',
       start: new Date(2025, 4, 29, 18, 0),
       end: new Date(2025, 4, 29, 19, 0),
@@ -64,9 +64,9 @@ const Disponibilidad = () => {
 
         {/* Calendario al centro */}
         <div className="flex-1">
-        <header className="flex items-center justify-between px-8 py-6">
-        <h1 className="text-4xl font-bold text-gray-800">Mi Disponibilidad</h1>
-        </header>
+          <header className="flex items-center justify-between px-8 py-6">
+            <h1 className="text-4xl font-bold text-gray-800">Mi Disponibilidad</h1>
+          </header>
           <MyCalendar
             events={eventos}
             components={{ event: CustomEvent }} // Pasamos el componente personalizado

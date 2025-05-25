@@ -22,15 +22,12 @@ export const RegisterForm = () => {
     last_name: '',
     telephone: '',
     role: 'paciente',
-    // Campos específicos para psicólogo
     especialidad: '',
     licencia: '',
     formacion: '',
-    // Campos específicos para paciente
     motivoConsulta: ''
   });
 
-  // Update role when selection changes
   useEffect(() => {
     setFormData(prev => ({ ...prev, role: selectedRole }));
   }, [selectedRole]);
@@ -50,10 +47,8 @@ export const RegisterForm = () => {
     setError('');
 
     try {
-      // Generate full name from first and last name
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
       
-      // Create payload based on role with exactly the fields needed
       let userData = {
         email: formData.email,
         password: formData.password,
@@ -64,7 +59,6 @@ export const RegisterForm = () => {
         role: selectedRole
       };
       
-      // Add role-specific fields
       if (selectedRole === 'psicologo') {
         userData = {
           ...userData,
@@ -84,7 +78,6 @@ export const RegisterForm = () => {
       const result = await authService.register(userData);
       console.log('Registration successful:', result);
       
-      // Redirect to login page with success message
       navigate('/login', { state: { registrationSuccess: true } });
     } catch (err) {
       console.error('Registration failed:', err);
@@ -97,7 +90,6 @@ export const RegisterForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-        {/* Left sidebar */}
         <div className="w-full md:w-2/5">
           <AuthSidebar 
             title="Psicólogos cualificados" 
@@ -105,7 +97,6 @@ export const RegisterForm = () => {
           />
         </div>
 
-        {/* Right content */}
         <div className="w-full md:w-3/5 p-8">
           <div className="w-full max-w-md mx-auto">
             <div className="text-right mb-4">
@@ -210,7 +201,6 @@ export const RegisterForm = () => {
                 </div>
               </div>
 
-              {/* Selección de rol */}
               <div>
                 <label className="block text-sm font-medium mb-1">Tipo de cuenta</label>
                 <div className="grid grid-cols-2 gap-4">
@@ -239,7 +229,6 @@ export const RegisterForm = () => {
                 </div>
               </div>
 
-              {/* Campos específicos según rol */}
               {selectedRole === 'psicologo' && (
                 <>
                   <div>

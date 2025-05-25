@@ -17,6 +17,7 @@ import TestForm from "./components/auth/TestForm";
 import ResetPassword from "./components/auth/ResetPassword";
 import ReservaCita from "./components/auth/reservaCita";
 import Disponibilidad from "./components/auth/Disponibilidad";
+import MainPage from "./pages/mainpage.jsx";
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
@@ -61,8 +62,12 @@ const AppContent = () => {
       <Routes>
         <Route
           path="/"
+          element={<MainPage />}
+        />
+        <Route
+          path="/dashboard" 
           element={
-            user ? <Navigate to="/PagPrincipal" /> : <Navigate to="/login" />
+            user ? <PagPrincipal /> : <Navigate to="/login" />
           }
         />
         <Route
@@ -88,6 +93,8 @@ const AppContent = () => {
         <Route path="/disponibilidad" element={<Disponibilidad />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/CrearPruebas" element={<CrearPruebas />} />
+        <Route path="/mainpage" element={<MainPage />} />
+        <Route path="/testmenu" element={<TestsMenu />} />
       </Routes>
     </Router>
   );

@@ -23,7 +23,6 @@ export const LoginForm = () => {
       const result = await login(credentials);
       console.log('Login successful:', result);
 
-      // Save remember me preference if checked
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', credentials.email);
       } else {
@@ -47,7 +46,6 @@ export const LoginForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-        {/* Left sidebar */}
         <div className="w-full md:w-2/5">
           <AuthSidebar 
             title="Psicólogos cualificados" 
@@ -55,7 +53,6 @@ export const LoginForm = () => {
           />
         </div>
 
-        {/* Right content */}
         <div className="w-full md:w-3/5 p-8 md:p-12">
           <div className="w-full max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-6">Bienvenido</h2>

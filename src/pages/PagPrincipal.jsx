@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Button from "../components/common/Button";
-import TestMenu from "../components/auth/TestMenu";
-import TestForm from "../components/auth/TestForm";
-import TestResults from "../components/auth/TestResults";
-import Sidebar from "../components/common/SIdebar";
+import TestMenu from "../components/test/TestMenu";
+import TestForm from "../components/test/TestForm";
+import TestResults from "../components/test/TestResults";
 
 export const PagPrincipal = () => {
   const navigate = useNavigate();
@@ -56,7 +55,6 @@ export const PagPrincipal = () => {
       <div className="w-full min-h-screen bg-gray-50">
 
         <div className="flex gap-4 p-4 min-h-[600px]">
-          <Sidebar />
 
           {/* Contenido central que ocupa el ancho restante */}
           <div className="flex-1 flex flex-col items-center">

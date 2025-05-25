@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import StepDisponibilidad from "./StepDisponibilidad";
+import StepDisponibilidad from "../Calendario/StepDisponibilidad";
 import { useNavigate } from "react-router-dom";
 import StepDatosPago from "./StepDatosPagos";
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { format, parseISO, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
-import MyCalendar from '../common/Calendar2'
+import MyCalendar from './Calendar2'
 import disponibilidadService from '../../services/disponibilidadService'
 import { toast } from 'react-toastify'
 import PsicologoSidebar from '../dashboard/PsicologoSidebar'

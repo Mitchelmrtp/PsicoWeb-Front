@@ -12,13 +12,13 @@ import { LoginForm } from "./components/auth/Login";
 import { RegisterForm } from "./components/auth/Register";
 import { ForgotPassword } from "./components/auth/ForgotPassword";
 import { PagPrincipal } from "./pages/PagPrincipal";
-import { Form } from "./components/auth/Form";
-import { CrearPruebas} from "./components/auth/CrearPruebas";
-import TestsMenu from "./components/auth/TestMenu";
-import TestForm from "./components/auth/TestForm";
+import { Form } from "./components/test/Form.jsx";
+import { CrearPruebas} from "./components/test/CrearPruebas.jsx";
+import TestsMenu from "./components/test/TestMenu.jsx";
+import TestForm from "./components/test/TestForm.jsx";
 import ResetPassword from "./components/auth/ResetPassword";
 import ReservaCita from "./components/auth/reservaCita";
-import Disponibilidad from "./components/auth/Disponibilidad";
+import Disponibilidad from "./components/Calendario/Disponibilidad.jsx";
 import MainPage from "./pages/mainpage.jsx";
 import DashboardContainer from "./components/dashboard/DashboardContainer";
 

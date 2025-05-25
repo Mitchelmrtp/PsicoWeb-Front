@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../common/Button";
-import Sidebar from "../common/SIdebar"; // Corrige según sea necesario
 
 export const CrearPruebas = () => {
   const navigate = useNavigate();
@@ -60,7 +59,6 @@ export const CrearPruebas = () => {
   return (
     <div className="w-full min-h-screen bg-gray-50">
       <div className="flex gap-4 p-4 min-h-[600px]">
-        <Sidebar />
 
         <div className="flex-1 px-10 py-6">
           <header className="flex items-center justify-between mb-8">

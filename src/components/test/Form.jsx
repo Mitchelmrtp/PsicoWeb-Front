@@ -5,7 +5,6 @@ import Button from "../common/Button";
 import TestMenu from "./TestMenu";
 import TestForm from "./TestForm";
 import TestResults from "./TestResults";
-import Sidebar from '../common/SIdebar'
 export const Form = () => {
   const navigate = useNavigate();
   const [testSeleccionado, setTestSeleccionado] = useState(null);
@@ -55,11 +54,7 @@ export const Form = () => {
           <h1 className="text-4xl font-extrabold text-gray-800">FORM</h1>
         </header>
 
-        <div className="flex gap-4 p-4 min-h-[600px]">
-          {/* Sidebar a la izquierda */}
-          <Sidebar />
-
-        </div>
+    
       </div>
     );
   }

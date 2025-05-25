@@ -26,6 +26,11 @@ const Disponibilidad = () => {
       start: new Date(2025, 4, 23, 18, 0),
       end: new Date(2025, 4, 23, 19, 0),
     },
+        {
+      title: '1',
+      start: new Date(2025, 4, 29, 18, 0),
+      end: new Date(2025, 4, 29, 19, 0),
+    },
     {
       title: '2',
       start: new Date(2025, 4, 23, 10, 0),
@@ -33,8 +38,8 @@ const Disponibilidad = () => {
     },
     {
       title: '2',
-      start: new Date(2025, 4, 19, 10, 0),
-      end: new Date(2025, 4, 19, 11, 0),
+      start: new Date(2025, 4, 26, 10, 0),
+      end: new Date(2025, 4, 26, 11, 0),
     },
     {
       title: '3',
@@ -52,9 +57,6 @@ const Disponibilidad = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <header className="flex items-center justify-between px-8 py-6">
-        <h1 className="text-4xl font-extrabold text-gray-800">DISPONIBILIDAD</h1>
-      </header>
 
       <div className="flex gap-4 p-4 min-h-[600px]">
         {/* Sidebar a la izquierda */}
@@ -62,6 +64,9 @@ const Disponibilidad = () => {
 
         {/* Calendario al centro */}
         <div className="flex-1">
+        <header className="flex items-center justify-between px-8 py-6">
+        <h1 className="text-4xl font-bold text-gray-800">Mi Disponibilidad</h1>
+        </header>
           <MyCalendar
             events={eventos}
             components={{ event: CustomEvent }} // Pasamos el componente personalizado
@@ -76,13 +81,22 @@ const Disponibilidad = () => {
 }
 
 const EventSummary = ({ eventos }) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // reset hora
+
+  const eventosProximos = eventos.filter(ev => {
+    const evDate = new Date(ev.start);
+    evDate.setHours(0, 0, 0, 0);
+    return evDate >= today;
+  });
+
   return (
     <div className="event-summary p-4 border-l border-gray-200 w-80 overflow-auto h-[600px]">
-      <h2 className="text-xl font-bold mb-4">Eventos</h2>
-      {eventos.length === 0 ? (
+      <h2 className="text-xl font-bold mb-4">Próximos</h2>
+      {eventosProximos.length === 0 ? (
         <p>No hay eventos disponibles</p>
       ) : (
-        eventos.map((ev, idx) => (
+        eventosProximos.map((ev, idx) => (
           <div key={idx} className="bg-gray-100 p-3 rounded mb-3 shadow">
             <p className="font-semibold">{ev.title}</p>
             <p className="text-sm">
@@ -93,7 +107,7 @@ const EventSummary = ({ eventos }) => {
         ))
       )}
     </div>
-  )
-}
+  );
+};
 
 export default Disponibilidad

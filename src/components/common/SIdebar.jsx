@@ -7,7 +7,7 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-white shadow-lg border-r min-h-screen p-6 flex flex-col">
-      <h2 className="text-2xl font-bold text-indigo-600 mb-8">PSICOWEB</h2>
+      <h2 className="text-4xl font-semibold text-blue-900 mb-8">PsycoWeb</h2>
 
       <nav className="flex flex-col space-y-4">
         <button

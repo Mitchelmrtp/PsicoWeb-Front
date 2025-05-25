@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import Sidebar from '../components/dashboard/Sidebar';
+import SidebarManager from '../components/dashboard/SidebarManager';
 
 const PacienteDashboard = () => {
   const { user } = useAuth();
@@ -105,7 +105,7 @@ const PacienteDashboard = () => {
   
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <SidebarManager />
       
       <div className="flex-1 overflow-y-auto">
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">

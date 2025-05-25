@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import Sidebar from '../components/dashboard/Sidebar';
+import SidebarManager from '../components/dashboard/SidebarManager';
 import { ENDPOINTS, getAuthHeader } from '../config/api';
 
 const PsicologoDashboard = () => {
@@ -12,8 +12,6 @@ const PsicologoDashboard = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        // In a real app, you would fetch this data from your API
-        // For now, we'll use mock data that matches your design
         const mockAppointments = [
           {
             id: '1',
@@ -109,7 +107,7 @@ const PsicologoDashboard = () => {
   
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <SidebarManager />
       
       <div className="flex-1 overflow-y-auto">
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">

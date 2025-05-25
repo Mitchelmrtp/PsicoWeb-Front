@@ -21,6 +21,8 @@ export const ENDPOINTS = {
   // Endpoints para pruebas psicológicas
   PRUEBAS: `${API_URL}/pruebas`,
   RESULTADOS: `${API_URL}/pruebas/resultados`,
+  // Endpoint para disponibilidad
+  DISPONIBILIDAD: `${API_URL}/disponibilidad`,
 };
 
 export const getAuthHeader = () => {

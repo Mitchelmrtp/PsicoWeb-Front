@@ -4,6 +4,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import { LoginForm } from "./components/auth/Login";
@@ -113,7 +115,12 @@ const AppContent = () => {
 };
 
 function App() {
-  return <AppWithAuth />;
+  return (
+    <>
+      <AppWithAuth />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
+  );
 }
 
 export default App;

@@ -368,9 +368,9 @@ const Disponibilidad = () => {
             </div>
             
             {/* Calendario */}
-            <div className="bg-white shadow-md rounded-lg p-6 mx-8 mb-8">
+            <div className="bg-white shadow-md rounded-lg p-6 mx-8 mb-8 overflow-hidden">
               <h2 className="text-xl font-semibold mb-4">Vista del Calendario</h2>
-              <div className="h-[500px]">
+              <div className="h-[500px] overflow-auto">
                 <MyCalendar
                   events={eventos}
                   components={{ event: CustomEvent }}

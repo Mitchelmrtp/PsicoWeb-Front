@@ -1,40 +1,40 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import authService from '../../services/authService';
-import Input from '../common/Input';
-import Button from '../common/Button';
-import FormError from '../common/FormError';
-import AuthSidebar from '../common/AuthSidebar';
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import authService from "../../services/authService";
+import Input from "../common/Input";
+import Button from "../common/Button";
+import FormError from "../common/FormError";
+import AuthSidebar from "../common/AuthSidebar";
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('paciente');
-  
+  const [selectedRole, setSelectedRole] = useState("paciente");
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    first_name: '',
-    last_name: '',
-    telephone: '',
-    role: 'paciente',
-    especialidad: '',
-    licencia: '',
-    formacion: '',
-    motivoConsulta: ''
+    email: "",
+    password: "",
+    name: "",
+    first_name: "",
+    last_name: "",
+    telephone: "",
+    role: "paciente",
+    especialidad: "",
+    licencia: "",
+    formacion: "",
+    motivoConsulta: "",
   });
 
   useEffect(() => {
-    setFormData(prev => ({ ...prev, role: selectedRole }));
+    setFormData((prev) => ({ ...prev, role: selectedRole }));
   }, [selectedRole]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const togglePasswordVisibility = () => {
@@ -44,11 +44,11 @@ export const RegisterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const fullName = `${formData.first_name} ${formData.last_name}`.trim();
-      
+
       let userData = {
         email: formData.email,
         password: formData.password,
@@ -56,32 +56,32 @@ export const RegisterForm = () => {
         first_name: formData.first_name,
         last_name: formData.last_name,
         telephone: formData.telephone,
-        role: selectedRole
+        role: selectedRole,
       };
-      
-      if (selectedRole === 'psicologo') {
+
+      if (selectedRole === "psicologo") {
         userData = {
           ...userData,
           especialidad: formData.especialidad,
           licencia: formData.licencia,
-          formacion: formData.formacion
+          formacion: formData.formacion,
         };
-      } else if (selectedRole === 'paciente') {
+      } else if (selectedRole === "paciente") {
         userData = {
           ...userData,
-          motivoConsulta: formData.motivoConsulta
+          motivoConsulta: formData.motivoConsulta,
         };
       }
-      
-      console.log('Sending registration data:', userData);
-      
+
+      console.log("Sending registration data:", userData);
+
       const result = await authService.register(userData);
-      console.log('Registration successful:', result);
-      
-      navigate('/login', { state: { registrationSuccess: true } });
+      console.log("Registration successful:", result);
+
+      navigate("/login", { state: { registrationSuccess: true } });
     } catch (err) {
-      console.error('Registration failed:', err);
-      setError(err.message || 'Error al registrar usuario');
+      console.error("Registration failed:", err);
+      setError(err.message || "Error al registrar usuario");
     } finally {
       setLoading(false);
     }
@@ -91,8 +91,8 @@ export const RegisterForm = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
         <div className="w-full md:w-2/5">
-          <AuthSidebar 
-            title="Psicólogos cualificados" 
+          <AuthSidebar
+            title="Psicólogos cualificados"
             subtitle="El mejor trato posible"
           />
         </div>
@@ -100,23 +100,34 @@ export const RegisterForm = () => {
         <div className="w-full md:w-3/5 p-8">
           <div className="w-full max-w-md mx-auto">
             <div className="text-right mb-4">
-              <button 
-                onClick={() => navigate('/')}
+              <button
+                onClick={() => navigate("/")}
                 className="text-gray-500 hover:text-gray-800"
               >
                 ✕
               </button>
             </div>
-            
+
             <h2 className="text-3xl font-bold mb-2">¡Bienvenido!</h2>
             <p className="text-sm text-gray-600 mb-6">
-              Ya conoces PsycoWeb? <Link to="/login" className="text-blue-600 hover:underline font-medium">Inicia sesión</Link>
+              Ya conoces PsycoWeb?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Inicia sesión
+              </Link>
             </p>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="first_name" className="block text-sm font-medium mb-1">Nombres</label>
+                  <label
+                    htmlFor="first_name"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Nombres
+                  </label>
                   <Input
                     id="first_name"
                     name="first_name"
@@ -125,9 +136,14 @@ export const RegisterForm = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="last_name" className="block text-sm font-medium mb-1">Apellidos</label>
+                  <label
+                    htmlFor="last_name"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Apellidos
+                  </label>
                   <Input
                     id="last_name"
                     name="last_name"
@@ -137,9 +153,14 @@ export const RegisterForm = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">Correo electrónico</label>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Correo electrónico
+                </label>
                 <Input
                   id="email"
                   name="email"
@@ -149,9 +170,14 @@ export const RegisterForm = () => {
                   required
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="telephone" className="block text-sm font-medium mb-1">Número de Teléfono</label>
+                <label
+                  htmlFor="telephone"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Número de Teléfono
+                </label>
                 <div className="flex">
                   <div className="w-20 mr-2">
                     <select
@@ -174,9 +200,14 @@ export const RegisterForm = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-1">Tu contraseña</label>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Tu contraseña
+                </label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -202,37 +233,44 @@ export const RegisterForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Tipo de cuenta</label>
+                <label className="block text-sm font-medium mb-1">
+                  Tipo de cuenta
+                </label>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
                     className={`flex items-center justify-center px-3 py-2 border rounded-md ${
-                      selectedRole === 'paciente' 
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700' 
-                        : 'border-gray-300 text-gray-700'
+                      selectedRole === "paciente"
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                        : "border-gray-300 text-gray-700"
                     }`}
-                    onClick={() => setSelectedRole('paciente')}
+                    onClick={() => setSelectedRole("paciente")}
                   >
                     <span>Paciente</span>
                   </button>
                   <button
                     type="button"
                     className={`flex items-center justify-center px-3 py-2 border rounded-md ${
-                      selectedRole === 'psicologo' 
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700' 
-                        : 'border-gray-300 text-gray-700'
+                      selectedRole === "psicologo"
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                        : "border-gray-300 text-gray-700"
                     }`}
-                    onClick={() => setSelectedRole('psicologo')}
+                    onClick={() => setSelectedRole("psicologo")}
                   >
                     <span>Psicólogo</span>
                   </button>
                 </div>
               </div>
 
-              {selectedRole === 'psicologo' && (
+              {selectedRole === "psicologo" && (
                 <>
                   <div>
-                    <label htmlFor="especialidad" className="block text-sm font-medium mb-1">Especialidad</label>
+                    <label
+                      htmlFor="especialidad"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Especialidad
+                    </label>
                     <Input
                       id="especialidad"
                       name="especialidad"
@@ -242,7 +280,12 @@ export const RegisterForm = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="licencia" className="block text-sm font-medium mb-1">Número de Licencia</label>
+                    <label
+                      htmlFor="licencia"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Número de Licencia
+                    </label>
                     <Input
                       id="licencia"
                       name="licencia"
@@ -252,7 +295,12 @@ export const RegisterForm = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="formacion" className="block text-sm font-medium mb-1">Formación Académica</label>
+                    <label
+                      htmlFor="formacion"
+                      className="block text-sm font-medium mb-1"
+                    >
+                      Formación Académica
+                    </label>
                     <Input
                       id="formacion"
                       name="formacion"
@@ -264,9 +312,14 @@ export const RegisterForm = () => {
                 </>
               )}
 
-              {selectedRole === 'paciente' && (
+              {selectedRole === "paciente" && (
                 <div>
-                  <label htmlFor="motivoConsulta" className="block text-sm font-medium mb-1">Motivo de Consulta</label>
+                  <label
+                    htmlFor="motivoConsulta"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Motivo de Consulta
+                  </label>
                   <textarea
                     id="motivoConsulta"
                     name="motivoConsulta"
@@ -287,7 +340,7 @@ export const RegisterForm = () => {
                 fullWidth
                 className="bg-indigo-800 hover:bg-indigo-900 mt-4"
               >
-                {loading ? 'Registrando...' : 'Registrarse'}
+                {loading ? "Registrando..." : "Registrarse"}
               </Button>
             </form>
           </div>

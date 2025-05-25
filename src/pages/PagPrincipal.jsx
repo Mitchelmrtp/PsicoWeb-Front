@@ -45,7 +45,10 @@ export const PagPrincipal = () => {
         <Button variant="secondary" onClick={() => setMostrarResultados(false)}>
           ← Volver a la página principal
         </Button>
-        <TestResults resultados={resultadosTests} onBack={() => setMostrarResultados(false)} />
+        <TestResults
+          resultados={resultadosTests}
+          onBack={() => setMostrarResultados(false)}
+        />
       </div>
     );
   }
@@ -53,18 +56,19 @@ export const PagPrincipal = () => {
   if (!testSeleccionado) {
     return (
       <div className="w-full min-h-screen bg-gray-50">
-
         <div className="flex gap-4 p-4 min-h-[600px]">
-
           {/* Contenido central que ocupa el ancho restante */}
           <div className="flex-1 flex flex-col items-center">
             <h2 className="text-3xl font-semibold text-center px-8 py-6 text-indigo-700 mb-6">
-              Bienvenido a <span className="text-indigo-500 font-bold">PSICOWEB</span>
+              Bienvenido a{" "}
+              <span className="text-indigo-500 font-bold">PSICOWEB</span>
             </h2>
 
             {/* Card de acciones */}
             <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-3xl mb-8">
-              <h3 className="text-xl font-bold mb-4 text-gray-800">Acciones rápidas</h3>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">
+                Acciones rápidas
+              </h3>
               <div className="flex flex-wrap justify-center gap-4">
                 <Button variant="primary" onClick={handleDisponibilidad}>
                   Ver disponibilidad

@@ -32,7 +32,6 @@ export const Form = () => {
     navigate("/reserva");
   };
 
- 
   if (mostrarResultados) {
     return (
       <div className="p-6">
@@ -53,8 +52,6 @@ export const Form = () => {
         <header className="flex items-center justify-between px-8 py-6">
           <h1 className="text-4xl font-extrabold text-gray-800">FORM</h1>
         </header>
-
-    
       </div>
     );
   }

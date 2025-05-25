@@ -7,31 +7,29 @@ export const CrearPruebas = () => {
   const [nombreTest, setNombreTest] = useState("Test de ansiedad");
   const [duracion, setDuracion] = useState("30 mins");
   const [preguntas, setPreguntas] = useState([
-    { id: Date.now(), texto: "", opciones: [""], obligatorio: false }
+    { id: Date.now(), texto: "", opciones: [""], obligatorio: false },
   ]);
 
   const handleAgregarPregunta = () => {
-    setPreguntas(prev => [
+    setPreguntas((prev) => [
       ...prev,
-      { id: Date.now(), texto: "", opciones: [""], obligatorio: false }
+      { id: Date.now(), texto: "", opciones: [""], obligatorio: false },
     ]);
   };
 
   const handleEliminarPregunta = (id) => {
-    setPreguntas(prev => prev.filter(p => p.id !== id));
+    setPreguntas((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleCambioPregunta = (id, campo, valor) => {
-    setPreguntas(prev =>
-      prev.map(p =>
-        p.id === id ? { ...p, [campo]: valor } : p
-      )
+    setPreguntas((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [campo]: valor } : p))
     );
   };
 
   const handleCambioOpcion = (idPregunta, indexOpcion, valor) => {
-    setPreguntas(prev =>
-      prev.map(p => {
+    setPreguntas((prev) =>
+      prev.map((p) => {
         if (p.id !== idPregunta) return p;
         const nuevasOpciones = [...p.opciones];
         nuevasOpciones[indexOpcion] = valor;
@@ -41,30 +39,29 @@ export const CrearPruebas = () => {
   };
 
   const handleAgregarOpcion = (idPregunta) => {
-    setPreguntas(prev =>
-      prev.map(p =>
+    setPreguntas((prev) =>
+      prev.map((p) =>
         p.id === idPregunta ? { ...p, opciones: [...p.opciones, ""] } : p
       )
     );
   };
 
   const handleToggleObligatorio = (id) => {
-    setPreguntas(prev =>
-      prev.map(p =>
-        p.id === id ? { ...p, obligatorio: !p.obligatorio } : p
-      )
+    setPreguntas((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, obligatorio: !p.obligatorio } : p))
     );
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
       <div className="flex gap-4 p-4 min-h-[600px]">
-
         <div className="flex-1 px-10 py-6">
           <header className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-gray-800">Crear pruebas</h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">Hola, Javier Soldevilla</span>
+              <span className="text-sm text-gray-500">
+                Hola, Javier Soldevilla
+              </span>
               <img
                 src="https://avatars.githubusercontent.com/u/1?v=4"
                 alt="Stevan"
@@ -74,11 +71,15 @@ export const CrearPruebas = () => {
           </header>
 
           <section className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Insertar pregunta</h2>
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">
+              Insertar pregunta
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Duración</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Duración
+                </label>
                 <select
                   value={duracion}
                   onChange={(e) => setDuracion(e.target.value)}
@@ -91,7 +92,9 @@ export const CrearPruebas = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Nombre de test</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Nombre de test
+                </label>
                 <input
                   type="text"
                   value={nombreTest}
@@ -103,12 +106,17 @@ export const CrearPruebas = () => {
 
             {/* Preguntas dinámicas */}
             {preguntas.map((pregunta, idx) => (
-              <div key={pregunta.id} className="border rounded-xl p-4 bg-gray-50 mb-6">
+              <div
+                key={pregunta.id}
+                className="border rounded-xl p-4 bg-gray-50 mb-6"
+              >
                 <input
                   type="text"
                   placeholder={`Pregunta ${idx + 1}`}
                   value={pregunta.texto}
-                  onChange={(e) => handleCambioPregunta(pregunta.id, "texto", e.target.value)}
+                  onChange={(e) =>
+                    handleCambioPregunta(pregunta.id, "texto", e.target.value)
+                  }
                   className="w-full border-b py-2 px-1 text-lg font-medium focus:outline-none mb-3"
                 />
 
@@ -123,7 +131,9 @@ export const CrearPruebas = () => {
                     <input
                       type="text"
                       value={op}
-                      onChange={(e) => handleCambioOpcion(pregunta.id, i, e.target.value)}
+                      onChange={(e) =>
+                        handleCambioOpcion(pregunta.id, i, e.target.value)
+                      }
                       placeholder={`Opción ${i + 1}`}
                       className="flex-1 border-b px-2 py-1 focus:outline-none"
                     />
@@ -140,7 +150,9 @@ export const CrearPruebas = () => {
                 <div className="flex justify-between items-center mt-4">
                   <div className="flex gap-2 text-gray-500">
                     <button>📄</button>
-                    <button onClick={() => handleEliminarPregunta(pregunta.id)}>🗑️</button>
+                    <button onClick={() => handleEliminarPregunta(pregunta.id)}>
+                      🗑️
+                    </button>
                   </div>
 
                   <label className="flex items-center text-sm gap-2">

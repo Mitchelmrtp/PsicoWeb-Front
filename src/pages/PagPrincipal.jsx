@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import Button from "../common/Button";
-import TestMenu from "./TestMenu";
-import TestForm from "./TestForm";
-import TestResults from "./TestResults";
-import Sidebar from "../common/SIdebar"; // Asegúrate de la mayúscula
+import { useAuth } from "../hooks/useAuth";
+import Button from "../components/common/Button";
+import TestMenu from "../components/auth/TestMenu";
+import TestForm from "../components/auth/TestForm";
+import TestResults from "../components/auth/TestResults";
+import Sidebar from "../components/common/SIdebar";
 
 export const PagPrincipal = () => {
   const navigate = useNavigate();

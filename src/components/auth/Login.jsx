@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // ✅ agregamos useNavigate
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import FormError from '../common/FormError';
+import AuthSidebar from '../common/AuthSidebar';
 
 export const LoginForm = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate(); // ✅ hook para redirección
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +23,13 @@ export const LoginForm = () => {
       const result = await login(credentials);
       console.log('Login successful:', result);
 
-      // ✅ redirigir a PagPrincipal después del login
+      // Save remember me preference if checked
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', credentials.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+
       navigate('/PagPrincipal');
     } catch (err) {
       console.error('Login failed:', err);
@@ -37,56 +45,90 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div className="w-full">
-          <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              label="Email"
-              value={credentials.email}
-              onChange={handleChange}
-              required
-            />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
+        {/* Left sidebar */}
+        <div className="w-full md:w-2/5">
+          <AuthSidebar 
+            title="Psicólogos cualificados" 
+            subtitle="El mejor trato posible"
+          />
+        </div>
 
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label="Contraseña"
-              value={credentials.password}
-              onChange={handleChange}
-              required
-            />
+        {/* Right content */}
+        <div className="w-full md:w-3/5 p-8 md:p-12">
+          <div className="w-full max-w-md mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Bienvenido</h2>
+            <p className="text-sm text-gray-600 mb-8">
+              Nuevo en PsycoWeb? <Link to="/register" className="text-blue-600 hover:underline font-medium">Regístrate</Link>
+            </p>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                  Tu Correo
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={credentials.email}
+                  onChange={handleChange}
+                  placeholder="Correo"
+                  required
+                  className="border-gray-300"
+                />
+              </div>
 
-            <FormError error={error} />
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium mb-1">
+                  Tu contraseña
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={credentials.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  required
+                  className="border-gray-300"
+                />
+              </div>
 
-            <Button
-              type="submit"
-              fullWidth
-              disabled={loading}
-              variant="primary"
-            >
-              {loading ? 'Cargando...' : 'Iniciar Sesión'}
-            </Button>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    Recordarme
+                  </label>
+                </div>
+                <div className="text-sm">
+                  <Link to="/forgot-password" className="text-blue-600 hover:underline">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
+              </div>
 
-            <div className="text-center mt-4 text-sm">
-              <p>
-                ¿No tienes una cuenta?{' '}
-                <Link to="/register" className="text-blue-600 hover:underline">
-                  Regístrate aquí
-                </Link>
-              </p>
-              <p className="mt-2">
-                <Link to="/forgot-password" className="text-blue-600 hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </p>
-            </div>
-          </form>
+              <FormError error={error} />
+
+              <Button
+                type="submit"
+                fullWidth
+                disabled={loading}
+                className="bg-indigo-800 hover:bg-indigo-900"
+              >
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

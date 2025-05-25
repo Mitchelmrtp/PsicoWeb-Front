@@ -9,7 +9,7 @@ import { useAuth } from "./hooks/useAuth";
 import { LoginForm } from "./components/auth/Login";
 import { RegisterForm } from "./components/auth/Register";
 import { ForgotPassword } from "./components/auth/ForgotPassword";
-import { PagPrincipal } from "./components/auth/PagPrincipal";
+import { PagPrincipal } from "./pages/PagPrincipal";
 import { Form } from "./components/auth/Form";
 import { CrearPruebas} from "./components/auth/CrearPruebas";
 import TestsMenu from "./components/auth/TestMenu";

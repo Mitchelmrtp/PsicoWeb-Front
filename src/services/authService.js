@@ -31,33 +31,38 @@ class AuthService {
     }
 
     async register(userData) {
-        try {
-            const response = await fetch(ENDPOINTS.REGISTER, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData)
-            });
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Error en el registro');
+    try {
+        const response = await fetch(ENDPOINTS.REGISTER, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            // Improve error handling to show more details
+            if (data.error && Array.isArray(data.error)) {
+                // Handle validation errors from Joi
+                throw new Error(data.error.map(err => err.message).join(', '));
             }
-            
-            // Guardar el token
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('Register error:', error);
-            throw error;
+            throw new Error(data.message || 'Error en el registro');
         }
+        
+        // Guardar el token
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Register error:', error);
+        throw error;
     }
+}
 
     async forgotPassword(email) {
     try {

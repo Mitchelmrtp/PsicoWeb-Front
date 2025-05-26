@@ -27,7 +27,11 @@ export const ENDPOINTS = {
 
 export const getAuthHeader = () => {
     const token = localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
+    if (!token) {
+        console.warn('No authentication token found');
+        return {};
+    }
+    return { 'Authorization': `Bearer ${token}` };
 };
 
 export default API_URL;

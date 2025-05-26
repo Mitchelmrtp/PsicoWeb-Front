@@ -344,11 +344,35 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
             className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Seleccionar psicólogo</option>
-            {psicologos.map((psicologo) => (
-              <option key={psicologo.id} value={psicologo.id}>
-                {`Dr. ${psicologo.first_name} ${psicologo.last_name}`}
-              </option>
-            ))}
+            {psicologos.map((psicologo) => {
+              // Extract psychologist name correctly
+              let displayName = 'Psicólogo';
+              
+              if (psicologo.User) {
+                // First try to use name field
+                if (psicologo.User.name) {
+                  displayName = `${psicologo.User.name}`;
+                }
+                // Fall back to first_name and last_name
+                else if (psicologo.User.first_name || psicologo.User.last_name) {
+                  const firstName = psicologo.User.first_name || '';
+                  const lastName = psicologo.User.last_name || '';
+                  displayName = `${firstName} ${lastName}`;
+                }
+              } else if (psicologo.first_name || psicologo.last_name) {
+                const firstName = psicologo.first_name || '';
+                const lastName = psicologo.last_name || '';
+                displayName = `${firstName} ${lastName}`;
+              } else if (psicologo.name) {
+                displayName = psicologo.name;
+              }
+              
+              return (
+                <option key={psicologo.id} value={psicologo.id}>
+                  {`Psic. ${displayName.trim()}`}
+                </option>
+              );
+            })}
           </select>
         </div>
 

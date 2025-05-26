@@ -2,107 +2,369 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import SidebarManager from '../components/dashboard/SidebarManager';
+import { ENDPOINTS, getAuthHeader } from '../config/api';
+import { toast } from 'react-toastify';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const PacienteDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [recommendedPsychologists, setRecommendedPsychologists] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
+  const [loadingPsychologists, setLoadingPsychologists] = useState(true);
+  const [error, setError] = useState(null);
   
+  // Check if backend is accessible
   useEffect(() => {
-    const fetchData = async () => {
+    const checkBackendConnection = async () => {
       try {
-        // In a real app, you would fetch this data from your API
-        // For now, we'll use mock data that matches your design
-        const mockAppointments = [
-          {
-            id: 1,
-            doctor: 'Dr. Ashton Cleve',
-            date: new Date('2025-06-14T10:00:00'),
-            endTime: new Date('2025-06-14T10:30:00'),
-          },
-          {
-            id: 2,
-            doctor: 'Dr. Ashton Cleve',
-            date: new Date('2025-06-15T10:00:00'),
-            endTime: new Date('2025-06-15T10:30:00'),
-          },
-          {
-            id: 3,
-            doctor: 'Dr. Ashton Cleve',
-            date: new Date('2025-06-15T09:00:00'),
-            endTime: new Date('2025-06-15T10:30:00'),
-          },
-          {
-            id: 4,
-            doctor: 'Dr. Ashton Cleve',
-            date: new Date('2025-06-15T10:00:00'),
-            endTime: new Date('2025-06-15T10:30:00'),
-          }
-        ];
+        const response = await fetch(`${ENDPOINTS.BASE_URL}/health`, { 
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
         
-        const mockPsychologists = [
-          {
-            id: 1,
-            name: 'Amanda Clara',
-            specialty: 'Psicología Infantil',
-            experience: '12 años de experiencia',
-            availability: 'Mar y Jue',
-            availabilityHours: '10:00 AM-01:00 PM',
-            price: 25,
-            image: '/assets/psychologist1.jpg'
-          },
-          {
-            id: 2,
-            name: 'Jason Shatsky',
-            specialty: 'Psicología Clínica',
-            experience: '7 años de experiencia',
-            availability: 'Mar y Jue',
-            availabilityHours: '10:00 AM-01:00 PM',
-            price: 35,
-            image: '/assets/psychologist2.jpg'
-          },
-          {
-            id: 3,
-            name: 'Jessie Dux',
-            specialty: 'Psicólogo educativo',
-            experience: '5 años de experiencia',
-            availability: 'Mar y Jue',
-            availabilityHours: '10:00 AM-01:00 PM',
-            price: 15,
-            image: '/assets/psychologist3.jpg'
-          }
-        ];
-        
-        setUpcomingAppointments(mockAppointments);
-        setRecommendedPsychologists(mockPsychologists);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setLoading(false);
+        if (!response.ok) {
+          console.warn('Backend health check failed:', response.status);
+          toast.warning('La conexión con el servidor no es óptima');
+        }
+      } catch (err) {
+        console.error('Backend connection failed:', err);
+        toast.error('No se puede conectar con el servidor. Por favor, verifique que el servidor esté en funcionamiento.');
       }
     };
     
-    fetchData();
+    checkBackendConnection();
+  }, []);
+
+  // Fetch patient's appointments from the backend
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setLoadingAppointments(true);
+        
+        // Get today's date in YYYY-MM-DD format for filtering
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Fetch scheduled appointments - only get upcoming appointments
+        const response = await fetch(`${ENDPOINTS.SESIONES}?startDate=${today}&estado=programada`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar las citas');
+        }
+
+        const data = await response.json();
+        console.log('Appointment data from backend:', data);
+        
+        // Map backend data to the format expected by our UI
+        const formattedAppointments = data.map(appointment => {
+          // Check the structure of your data for debugging
+          console.log('Appointment Psicologo data:', appointment.Psicologo);
+          
+          // Extract psychologist name correctly
+          let doctorName = 'Psicólogo Asignado';
+          
+          if (appointment.Psicologo) {
+            // Check if User data is nested inside Psicologo
+            if (appointment.Psicologo.User) {
+              const firstName = appointment.Psicologo.User.first_name || '';
+              const lastName = appointment.Psicologo.User.last_name || '';
+              if (firstName || lastName) {
+                doctorName = `Psic. ${firstName} ${lastName}`;
+              }
+            } 
+            // Direct access if first_name and last_name are directly on Psicologo
+            else if (appointment.Psicologo.first_name || appointment.Psicologo.last_name) {
+              const firstName = appointment.Psicologo.first_name || '';
+              const lastName = appointment.Psicologo.last_name || '';
+              doctorName = `Psic. ${firstName} ${lastName}`;
+            }
+          }
+          
+          return {
+            id: appointment.id,
+            doctor: doctorName.trim(),
+            fecha: appointment.fecha,
+            date: new Date(`${appointment.fecha}T${appointment.horaInicio}`),
+            endTime: new Date(`${appointment.fecha}T${appointment.horaFin}`),
+            estado: appointment.estado,
+            psicologoId: appointment.idPsicologo
+          };
+        });
+        
+        // Sort appointments by date and time
+        formattedAppointments.sort((a, b) => a.date - b.date);
+        
+        setUpcomingAppointments(formattedAppointments);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching appointments:', err);
+        setError('No se pudieron cargar las citas programadas');
+        toast.error('Error al cargar las citas programadas');
+      } finally {
+        setLoadingAppointments(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  // Fetch recommended psychologists
+  useEffect(() => {
+    const fetchPsychologists = async () => {
+      try {
+        setLoadingPsychologists(true);
+        const response = await fetch(ENDPOINTS.PSICOLOGOS, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar psicólogos recomendados');
+        }
+
+        const data = await response.json();
+        
+        // First, log the raw data structure coming from backend
+        console.log('Raw psychologist data from API:', data);
+
+        // Map backend data to the format expected by UI
+        const formattedPsychologists = data.slice(0, 3).map(psych => {
+          // Extract psychologist name correctly
+          let psychName = 'Psicólogo';
+          
+          console.log('Individual psychologist raw data:', psych);
+          
+          // Check if User data is nested - most likely case based on your model structure
+          if (psych.User) {
+            console.log('User data found:', psych.User);
+            // First try to use name field which is definitely included in the API response
+            if (psych.User.name) {
+              psychName = `Psic. ${psych.User.name}`;
+            }
+            // Fall back to first_name and last_name if available
+            else if (psych.User.first_name || psych.User.last_name) {
+              const firstName = psych.User.first_name || '';
+              const lastName = psych.User.last_name || '';
+              psychName = `Psic. ${firstName} ${lastName}`;
+            }
+          } 
+          // If data comes in psicologo.User.name format
+          else if (psych.User && psych.User.name) {
+            console.log('User.name found:', psych.User.name);
+            psychName = `Psic. ${psych.User.name}`;
+          }
+          // Direct access if first_name and last_name are directly on psych object
+          else if (psych.first_name || psych.last_name) {
+            console.log('Direct first_name/last_name found');
+            const firstName = psych.first_name || '';
+            const lastName = psych.last_name || '';
+            psychName = `Psic. ${firstName} ${lastName}`;
+          }
+          // If name comes in a single 'name' field
+          else if (psych.name) {
+            console.log('Direct name field found:', psych.name);
+            psychName = `Psic. ${psych.name}`;
+          }
+          // Check if data might be in a different structure entirely
+          else {
+            console.log('No standard name format found, checking additional fields');
+            
+            // Look for any field that might contain name information
+            if (psych.nombre || psych.apellido) {
+              const firstName = psych.nombre || '';
+              const lastName = psych.apellido || '';
+              psychName = `Psic. ${firstName} ${lastName}`;
+            }
+            
+            // Look for deeply nested user info under different paths
+            else if (psych.usuario && psych.usuario.nombre) {
+              psychName = `Psic. ${psych.usuario.nombre}`;
+            }
+          }
+          
+          console.log('Extracted name:', psychName);
+          
+          return {
+            id: psych.id,
+            name: psychName.trim(),
+            specialty: psych.especialidad || 'Psicología General',
+            experience: psych.anosExperiencia ? `${psych.anosExperiencia} años de experiencia` : '5 años de experiencia',
+            availability: 'Lun a Vie',
+            availabilityHours: '09:00 AM-06:00 PM',
+            price: psych.tarifaPorSesion || 35,
+            image: psych.profileImage || '/assets/default-avatar.png'
+          };
+        });
+        
+        setRecommendedPsychologists(formattedPsychologists);
+      } catch (err) {
+        console.error('Error fetching psychologists:', err);
+        setError('No se pudieron cargar los psicólogos recomendados');
+        toast.error('Error al cargar los psicólogos recomendados. Por favor, intente nuevamente.');
+        setRecommendedPsychologists([]); // Set empty array instead of hardcoded data
+      } finally {
+        setLoadingPsychologists(false);
+      }
+    };
+    
+    fetchPsychologists();
   }, []);
   
+  // Helper function to format date ranges for display
   const formatTimeRange = (startDate, endDate) => {
-    const startTime = startDate.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false
-    });
+    if (!startDate || !endDate) return '';
     
-    const endTime = endDate.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false 
-    });
-    
-    return `${startTime} - ${endTime}`;
+    try {
+      const startTime = format(new Date(startDate), 'HH:mm', { locale: es });
+      const endTime = format(new Date(endDate), 'HH:mm', { locale: es });
+      return `${startTime} - ${endTime}`;
+    } catch (error) {
+      console.error('Error formatting time range:', error);
+      return '';
+    }
   };
+
+  // Group appointments by month
+  const appointmentsByMonth = upcomingAppointments.reduce((acc, appointment) => {
+    try {
+      const date = new Date(appointment.date);
+      const monthYear = format(date, 'MMMM yyyy', { locale: es });
+      
+      if (!acc[monthYear]) {
+        acc[monthYear] = [];
+      }
+      
+      acc[monthYear].push(appointment);
+    } catch (error) {
+      console.error('Error grouping appointment by month:', error, appointment);
+    }
+    
+    return acc;
+  }, {});
   
+  // Update the cancelAppointment function to use the correct endpoint
+
+  const cancelAppointment = async (appointmentId) => {
+    // First, confirm with the user
+    if (!window.confirm("¿Está seguro que desea cancelar esta cita?")) {
+      return;
+    }
+    
+    try {
+      // Show loading state
+      setLoadingAppointments(true);
+      
+      // Make API call to update the appointment status
+      const response = await fetch(`${ENDPOINTS.SESIONES}/${appointmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({ 
+          estado: 'cancelada'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cancelar la cita');
+      }
+
+      // Successfully cancelled
+      toast.success('La cita ha sido cancelada correctamente');
+      
+      // Refresh the appointments list
+      const fetchAppointments = async () => {
+        try {
+          // Implementation of fetchAppointments
+          // This is a simplified version - copy the full implementation from your useEffect
+          const today = new Date().toISOString().split('T')[0];
+          const response = await fetch(`${ENDPOINTS.SESIONES}?startDate=${today}&estado=programada`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeader(),
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Error al cargar las citas');
+          }
+
+          const data = await response.json();
+          // Process data and update state as in your original code
+          // (Simplified for brevity)
+          const formattedAppointments = data.map(appointment => {
+            // Check the structure of your data for debugging
+            console.log('Appointment Psicologo data:', appointment.Psicologo);
+            
+            // Extract psychologist name correctly
+            let doctorName = 'Psicólogo Asignado';
+            
+            if (appointment.Psicologo) {
+              // Check if User data is nested inside Psicologo
+              if (appointment.Psicologo.User) {
+                const firstName = appointment.Psicologo.User.first_name || '';
+                const lastName = appointment.Psicologo.User.last_name || '';
+                if (firstName || lastName) {
+                  doctorName = `Psic. ${firstName} ${lastName}`;
+                }
+              } 
+              // Direct access if first_name and last_name are directly on Psicologo
+              else if (appointment.Psicologo.first_name || appointment.Psicologo.last_name) {
+                const firstName = appointment.Psicologo.first_name || '';
+                const lastName = appointment.Psicologo.last_name || '';
+                doctorName = `Psic. ${firstName} ${lastName}`;
+              }
+            }
+            
+            return {
+              id: appointment.id,
+              doctor: doctorName.trim(),
+              fecha: appointment.fecha,
+              date: new Date(`${appointment.fecha}T${appointment.horaInicio}`),
+              endTime: new Date(`${appointment.fecha}T${appointment.horaFin}`),
+              estado: appointment.estado,
+              psicologoId: appointment.idPsicologo
+            };
+          });
+          
+          // Sort appointments by date and time
+          formattedAppointments.sort((a, b) => a.date - b.date);
+          
+          setUpcomingAppointments(formattedAppointments);
+          setError(null);
+        } catch (err) {
+          console.error('Error fetching appointments:', err);
+          setError('No se pudieron cargar las citas programadas');
+          toast.error('Error al cargar las citas programadas');
+        } finally {
+          setLoadingAppointments(false);
+        }
+      };
+      
+      // Call the function to refresh appointments
+      fetchAppointments();
+      
+    } catch (err) {
+      console.error('Error cancelling appointment:', err);
+      toast.error('No se pudo cancelar la cita. Por favor, intente nuevamente.');
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       <SidebarManager />
@@ -127,20 +389,6 @@ const PacienteDashboard = () => {
                 </svg>
               </div>
             </form>
-            
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Location"
-                className="pl-10 pr-4 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-300 w-40"
-              />
-              <div className="absolute left-3 top-2.5 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-            </div>
             
             <button className="bg-indigo-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-900 transition-colors">
               Buscar
@@ -173,35 +421,16 @@ const PacienteDashboard = () => {
           <section className="mb-10">
             <div className="bg-gradient-to-r from-blue-200 via-blue-300 to-indigo-200 rounded-3xl p-8 relative overflow-hidden">
               <div className="max-w-lg">
-                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-md">No need to visit local hospitals</h2>
-                <h3 className="text-xl font-medium text-white mb-4 drop-shadow-md">Get your consultation online</h3>
-                <p className="text-blue-100 mb-6">Audio/text/video/in-person</p>
+                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-md">No necesitas visitar hospitales</h2>
+                <h3 className="text-xl font-medium text-white mb-4 drop-shadow-md">Obtén tu consulta en línea</h3>
+                <p className="text-blue-100 mb-6">Audio/texto/video/presencial</p>
                 
-                <div className="flex items-center">
-                  <div className="flex -space-x-2 mr-3">
-                    <img src="/assets/avatar1.jpg" alt="Doctor" className="w-9 h-9 rounded-full border-2 border-white" />
-                    <img src="/assets/avatar2.jpg" alt="Doctor" className="w-9 h-9 rounded-full border-2 border-white" />
-                    <img src="/assets/avatar3.jpg" alt="Doctor" className="w-9 h-9 rounded-full border-2 border-white" />
-                  </div>
-                  <span className="text-white text-sm font-medium">+180 doctors are online</span>
-                </div>
-              </div>
-              
-              {/* Optional: Add an illustration or doctor image on the right side */}
-              <div className="absolute right-0 top-0 h-full w-1/3 hidden md:block">
-                <img 
-                  src="/assets/doctors.png" 
-                  alt="Doctors" 
-                  className="h-full w-full object-cover" 
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-center mt-4">
-              <div className="flex space-x-1">
-                <div className="h-2 w-2 rounded-full bg-indigo-800"></div>
-                <div className="h-2 w-2 rounded-full bg-gray-300"></div>
-                <div className="h-2 w-2 rounded-full bg-gray-300"></div>
+                <button 
+                  onClick={() => navigate('/reserva')}
+                  className="bg-white text-indigo-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100"
+                >
+                  Reservar cita ahora
+                </button>
               </div>
             </div>
           </section>
@@ -217,47 +446,87 @@ const PacienteDashboard = () => {
               </a>
             </div>
             
-            {loading ? (
+            {loadingAppointments ? (
               <div className="flex justify-center items-center h-40">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
               </div>
+            ) : error ? (
+              <div className="bg-yellow-50 p-4 rounded-lg text-yellow-700">
+                {error}. Por favor intente de nuevo más tarde.
+              </div>
+            ) : upcomingAppointments.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-6 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h4 className="text-lg font-medium text-gray-700 mb-2">No tienes citas programadas</h4>
+                <p className="text-gray-500 mb-4">Reserva una cita con uno de nuestros psicólogos profesionales</p>
+                <button 
+                  onClick={() => navigate('/reserva')}
+                  className="bg-indigo-800 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-900 transition-colors"
+                >
+                  Reservar Cita
+                </button>
+              </div>
             ) : (
               <div className="space-y-4">
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h4 className="text-gray-500 font-medium mb-2">June 2023</h4>
-                  
-                  {upcomingAppointments.map(appointment => (
-                    <div 
-                      key={appointment.id}
-                      className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="flex items-center">
-                        <div className="bg-gray-50 rounded-lg h-14 w-14 flex flex-col items-center justify-center mr-4">
-                          <span className="text-xs text-gray-500 uppercase">
-                            {appointment.date.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '')}
-                          </span>
-                          <span className="text-xl font-bold">
-                            {appointment.date.getDate()}
-                          </span>
+                {Object.entries(appointmentsByMonth).map(([month, appointments]) => (
+                  <div key={month} className="bg-white rounded-lg shadow p-4">
+                    <h4 className="text-gray-500 font-medium mb-2 capitalize">{month}</h4>
+                    
+                    {appointments.map(appointment => (
+                      <div 
+                        key={appointment.id}
+                        className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-center">
+                          <div className="bg-gray-50 rounded-lg h-14 w-14 flex flex-col items-center justify-center mr-4">
+                            <span className="text-xs text-gray-500 uppercase">
+                              {format(new Date(appointment.date), 'EEE', { locale: es })}
+                            </span>
+                            <span className="text-xl font-bold">
+                              {format(new Date(appointment.date), 'd', { locale: es })}
+                            </span>
+                          </div>
+                          
+                          <div>
+                            <h5 className="font-medium">{appointment.doctor}</h5>
+                            <p className="text-sm text-gray-500">
+                              {formatTimeRange(appointment.date, appointment.endTime)}
+                            </p>
+                            <span className="inline-block mt-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700">
+                              {appointment.estado === 'programada' ? 'Programada' : 
+                               appointment.estado === 'completada' ? 'Completada' : 'Cancelada'}
+                            </span>
+                          </div>
                         </div>
                         
-                        <div>
-                          <h5 className="font-medium">{appointment.doctor}</h5>
-                          <p className="text-sm text-gray-500">{formatTimeRange(appointment.date, appointment.endTime)}</p>
+                        <div className="flex space-x-2">
+                          {appointment.estado === 'programada' && (
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                cancelAppointment(appointment.id);
+                              }}
+                              className="px-4 py-2 rounded-md text-sm text-red-600 hover:bg-red-50"
+                            >
+                              Cancelar
+                            </button>
+                          )}
+                          <button
+                            className="text-indigo-800 p-2"
+                            onClick={() => navigate(`/citas/${appointment.id}`)}
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+                            </svg>
+                          </button>
                         </div>
                       </div>
-                      
-                      <button
-                        className="text-indigo-800 p-2"
-                        onClick={() => navigate(`/appointment/${appointment.id}`)}
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             )}
           </section>
@@ -273,9 +542,23 @@ const PacienteDashboard = () => {
               </a>
             </div>
             
-            {loading ? (
+            {loadingPsychologists ? (
               <div className="flex justify-center items-center h-40">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : recommendedPsychologists.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-6 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                <h4 className="text-lg font-medium text-gray-700 mb-2">No hay psicólogos disponibles</h4>
+                <p className="text-gray-500 mb-4">No pudimos cargar los psicólogos recomendados en este momento.</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-indigo-800 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-900 transition-colors"
+                >
+                  Reintentar
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -289,7 +572,7 @@ const PacienteDashboard = () => {
                           className="w-16 h-16 rounded-full object-cover mr-4"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = `https://ui-avatars.com/api/?name=${psych.name}&background=random`;
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(psych.name)}&background=random`;
                           }}
                         />
                         <div>
@@ -316,7 +599,7 @@ const PacienteDashboard = () => {
                         </div>
                         <div>
                           <p className="font-bold text-indigo-800">${psych.price}</p>
-                          <p className="text-xs text-gray-500">Starting</p>
+                          <p className="text-xs text-gray-500">Desde</p>
                         </div>
                       </div>
                       

@@ -1,98 +1,163 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import SidebarManager from '../components/dashboard/SidebarManager';
 import { ENDPOINTS, getAuthHeader } from '../config/api';
+import { toast } from 'react-toastify';
+import { format, parseISO, addMinutes, addHours } from 'date-fns';
+import { es } from 'date-fns/locale';
+import SidebarManager from '../components/dashboard/SidebarManager';
+import PatientsList from '../components/dashboard/PatientsList';
 
 const PsicologoDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('próximas');
+  const [today] = useState(new Date());
   
+  // New state for patients
+  const [patients, setPatients] = useState([]);
+  const [loadingPatients, setLoadingPatients] = useState(true);
+  const [patientsError, setPatientsError] = useState(null);
+  
+  // Fetch appointments from backend
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const mockAppointments = [
-          {
-            id: '1',
-            date: new Date('2025-05-15T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'scheduled',
-            progressLink: '/progreso/1',
-            documentsLink: '/documentos/1',
-          },
-          {
-            id: '2',
-            date: new Date('2025-05-16T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'scheduled',
-            progressLink: '/progreso/2',
-            documentsLink: '/documentos/2',
-          },
-          {
-            id: '3',
-            date: new Date('2025-05-19T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'pending',
-            progressLink: null,
-            documentsLink: null,
-          },
-          {
-            id: '4',
-            date: new Date('2025-06-02T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'scheduled',
-            progressLink: '/progreso/4',
-            documentsLink: '/documentos/4',
-          },
-          {
-            id: '5',
-            date: new Date('2025-06-03T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'scheduled',
-            progressLink: '/progreso/5',
-            documentsLink: '/documentos/5',
-          },
-          {
-            id: '6',
-            date: new Date('2025-06-04T09:00:00'),
-            patient: 'Stephine Claire',
-            status: 'pending',
-            progressLink: null,
-            documentsLink: null,
-          },
-        ];
+        setLoading(true);
         
-        setAppointments(mockAppointments);
-        setLoading(false);
+        // Get current date in YYYY-MM-DD format for filtering
+        const todayFormatted = format(today, 'yyyy-MM-dd');
+        
+        // API request based on selected tab
+        let endpoint = ENDPOINTS.SESIONES;
+        if (activeTab === 'próximas') {
+          endpoint += `?startDate=${todayFormatted}&estado=programada`;
+        } else if (activeTab === 'pasadas') {
+          endpoint += `?endDate=${todayFormatted}&estado=completada`;
+        } else if (activeTab === 'canceladas') {
+          endpoint += `?estado=cancelada`;
+        }
+        
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar las citas');
+        }
+        
+        const data = await response.json();
+        console.log('Appointment data from backend:', data);
+        
+        // Format appointments for UI
+        const formattedAppointments = data.map(appointment => {
+          const startDate = parseISO(`${appointment.fecha}T${appointment.horaInicio}`);
+          const endDate = appointment.horaFin 
+            ? parseISO(`${appointment.fecha}T${appointment.horaFin}`)
+            : addHours(startDate, 1);
+            
+          // Get patient name from nested objects
+          const patientName = appointment.Paciente && appointment.Paciente.User
+            ? `${appointment.Paciente.User.first_name || ''} ${appointment.Paciente.User.last_name || ''}`.trim()
+            : appointment.Paciente
+              ? `${appointment.Paciente.first_name || ''} ${appointment.Paciente.last_name || ''}`.trim()
+              : 'Paciente';
+              
+          return {
+            id: appointment.id,
+            patient: patientName,
+            date: startDate,
+            endTime: endDate,
+            status: appointment.estado,
+            progressLink: `/pacientes/${appointment.idPaciente}/progreso`,
+            documentsLink: `/pacientes/${appointment.idPaciente}/documentos`,
+            pacienteId: appointment.idPaciente
+          };
+        });
+        
+        // Sort by date
+        formattedAppointments.sort((a, b) => {
+          if (activeTab === 'próximas') {
+            return a.date - b.date;  // ascending for upcoming
+          } else {
+            return b.date - a.date;  // descending for past/canceled
+          }
+        });
+        
+        setAppointments(formattedAppointments);
       } catch (error) {
         console.error('Error fetching appointments:', error);
+        toast.error('No se pudieron cargar las citas');
+      } finally {
         setLoading(false);
       }
     };
     
     fetchAppointments();
-  }, []);
+  }, [activeTab, today, user.id]);
   
+  // New useEffect to fetch patients
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoadingPatients(true);
+        setPatientsError(null);
+        
+        const response = await fetch(ENDPOINTS.PSICOLOGO_PACIENTES, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar los pacientes');
+        }
+        
+        const data = await response.json();
+        console.log('Patient data from backend:', data);
+        
+        // Process patient data
+        const processedPatients = data.map(patient => ({
+          id: patient.id,
+          first_name: patient.first_name,
+          last_name: patient.last_name,
+          email: patient.email,
+          diagnostico: patient.diagnostico || 'Sin diagnóstico registrado',
+          lastAppointment: patient.lastAppointment || null
+        }));
+        
+        setPatients(processedPatients);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        setPatientsError('No se pudieron cargar los pacientes');
+        toast.error('Error al cargar los pacientes');
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
+    
+    fetchPatients();
+  }, [user.id]);
+
   const formatDate = (date) => {
-    const options = { weekday: 'short', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('es-ES', options).replace('.', '');
+    return format(date, 'EEE d', { locale: es }).replace('.', '');
   };
   
   const formatTime = (date) => {
-    return date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: false 
-    });
+    return format(date, 'HH:mm', { locale: es });
   };
   
   const groupAppointmentsByMonth = (appointments) => {
     return appointments.reduce((groups, appointment) => {
-      const monthYear = appointment.date.toLocaleDateString('es-ES', { 
-        month: 'long', 
-        year: 'numeric' 
-      });
+      const monthYear = format(appointment.date, 'MMMM yyyy', { locale: es });
       
       if (!groups[monthYear]) {
         groups[monthYear] = [];
@@ -101,6 +166,27 @@ const PsicologoDashboard = () => {
       groups[monthYear].push(appointment);
       return groups;
     }, {});
+  };
+  
+  const startNewAppointment = () => {
+    navigate('/nueva-cita');
+  };
+  
+  const handleChangeMonth = (e) => {
+    // Este handler se puede implementar para filtrar por mes
+    console.log('Mes seleccionado:', e.target.value);
+  };
+
+  const handleViewAppointment = (appointment) => {
+    navigate(`/citas/${appointment.id}`);
+  };
+
+  const handleEditAppointment = (appointment) => {
+    navigate(`/citas/${appointment.id}/editar`);
+  };
+  
+  const handleStartConsultation = (appointment) => {
+    navigate(`/consultas-online/${appointment.id}`);
   };
   
   const groupedAppointments = groupAppointmentsByMonth(appointments);
@@ -167,11 +253,17 @@ const PsicologoDashboard = () => {
               <div className="relative">
                 <select 
                   className="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  defaultValue="May 23"
+                  defaultValue={format(today, 'MMM yy', { locale: es })}
+                  onChange={handleChangeMonth}
                 >
-                  <option>May 23</option>
-                  <option>Jun 23</option>
-                  <option>Jul 23</option>
+                  {[...Array(12)].map((_, i) => {
+                    const date = new Date(today.getFullYear(), today.getMonth() - 3 + i, 1);
+                    return (
+                      <option key={i} value={format(date, 'yyyy-MM')}>
+                        {format(date, 'MMM yy', { locale: es })}
+                      </option>
+                    );
+                  })}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -180,7 +272,9 @@ const PsicologoDashboard = () => {
                 </div>
               </div>
               
-              <button className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button 
+                onClick={startNewAppointment}
+                className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 + Nueva Cita
               </button>
             </div>
@@ -189,6 +283,28 @@ const PsicologoDashboard = () => {
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : appointments.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay citas {activeTab}</h3>
+              <p className="text-gray-500 mb-6">
+                {activeTab === 'próximas' 
+                  ? 'No tienes citas programadas próximamente'
+                  : activeTab === 'pasadas'
+                    ? 'No tienes citas pasadas'
+                    : 'No tienes citas canceladas'}
+              </p>
+              {activeTab === 'próximas' && (
+                <button
+                  onClick={startNewAppointment}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Programar nueva cita
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-6">
@@ -218,7 +334,9 @@ const PsicologoDashboard = () => {
                                 <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className="text-gray-600">{formatTime(appointment.date)} - {formatTime(new Date(appointment.date.getTime() + 30 * 60000))}</span>
+                                <span className="text-gray-600">
+                                  {formatTime(appointment.date)} - {formatTime(appointment.endTime)}
+                                </span>
                               </div>
                               
                               <div className="mt-1 flex items-center space-x-2">
@@ -226,11 +344,33 @@ const PsicologoDashboard = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <span className="text-gray-600">{appointment.patient}</span>
+                                <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                                  appointment.status === 'programada' 
+                                    ? 'bg-green-50 text-green-700' 
+                                    : appointment.status === 'completada'
+                                      ? 'bg-blue-50 text-blue-700'
+                                      : 'bg-red-50 text-red-700'
+                                }`}>
+                                  {appointment.status === 'programada' 
+                                    ? 'Programada' 
+                                    : appointment.status === 'completada'
+                                      ? 'Completada'
+                                      : 'Cancelada'}
+                                </span>
                               </div>
                             </div>
                           </div>
                           
                           <div className="flex items-center space-x-3">
+                            {appointment.status === 'programada' && (
+                              <button
+                                onClick={() => handleStartConsultation(appointment)}
+                                className="px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm hover:bg-green-200 transition-colors"
+                              >
+                                Iniciar Consulta
+                              </button>
+                            )}
+                            
                             {appointment.progressLink && (
                               <a 
                                 href={appointment.progressLink}
@@ -245,15 +385,32 @@ const PsicologoDashboard = () => {
                                 href={appointment.documentsLink}
                                 className="text-blue-500 hover:underline text-sm"
                               >
-                                Ver Documentos
+                                Documentos
                               </a>
                             )}
                             
-                            <button className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <button 
+                              onClick={() => handleViewAppointment(appointment)}
+                              className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                              title="Ver detalles"
+                            >
                               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
                             </button>
+                            
+                            {appointment.status === 'programada' && (
+                              <button 
+                                onClick={() => handleEditAppointment(appointment)}
+                                className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                title="Editar cita"
+                              >
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -263,6 +420,28 @@ const PsicologoDashboard = () => {
               ))}
             </div>
           )}
+          
+          {/* New Patients section */}
+          <section className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">Mis Pacientes</h3>
+              <button 
+                onClick={() => navigate('/pacientes')}
+                className="text-blue-600 hover:underline flex items-center text-sm"
+              >
+                Ver Todos
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            
+            <PatientsList 
+              patients={patients}
+              loading={loadingPatients}
+              error={patientsError}
+            />
+          </section>
         </main>
       </div>
     </div>

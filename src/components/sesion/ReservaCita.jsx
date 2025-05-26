@@ -25,7 +25,6 @@ const ReservaCita = () => {
   const fetchPsicologos = async () => {
     try {
       const response = await fetch(ENDPOINTS.PSICOLOGOS, {
-        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
@@ -33,14 +32,48 @@ const ReservaCita = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Error al obtener psicólogos');
+        throw new Error('No se pudieron cargar los psicólogos');
       }
 
       const data = await response.json();
-      setPsicologos(data);
+      console.log('Raw psychologist data from API:', data);
+      
+      // Format the psychologist data properly
+      const formattedPsicologos = data.map(psicologo => {
+        let displayName = 'Psicólogo';
+        
+        // Extract name from correct data structure
+        if (psicologo.User) {
+          // First try to use name field
+          if (psicologo.User.name) {
+            displayName = `Psic. ${psicologo.User.name}`;
+          }
+          // Fall back to first_name and last_name
+          else if (psicologo.User.first_name || psicologo.User.last_name) {
+            const firstName = psicologo.User.first_name || '';
+            const lastName = psicologo.User.last_name || '';
+            displayName = `Psic. ${firstName} ${lastName}`;
+          }
+        } else if (psicologo.first_name || psicologo.last_name) {
+          const firstName = psicologo.first_name || '';
+          const lastName = psicologo.last_name || '';
+          displayName = `Psic. ${firstName} ${lastName}`;
+        } else if (psicologo.name) {
+          displayName = `Psic. ${psicologo.name}`;
+        }
+        
+        return {
+          ...psicologo,
+          displayName: displayName.trim()
+        };
+      });
+      
+      setPsicologos(formattedPsicologos);
     } catch (error) {
-      console.error("Error fetching psychologists:", error);
-      toast.error("Error al cargar la lista de psicólogos");
+      console.error('Error fetching psychologists:', error);
+      setError('No se pudieron cargar los psicólogos');
+    } finally {
+      setLoading(false);
     }
   };
 

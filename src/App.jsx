@@ -23,6 +23,12 @@ import MainPage from "./pages/mainpage.jsx";
 import DashboardContainer from "./components/dashboard/DashboardContainer";
 import PerfilPsicologo from "./components/auth/ProfilePsico.jsx";
 import PerfilPaciente from "./components/auth/ProfileUser.jsx";
+import MisConsultas from "./pages/MisConsultas";
+import PacientesPage from "./pages/PacientesPage";
+import TestManagement from "./components/test/TestManagement";
+import PatientTestView from "./components/test/PatientTestView";
+import TestPage from "./components/test/TestPage";
+import TestResultDetail from "./components/test/TestResultDetail";
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
@@ -104,12 +110,36 @@ const AppContent = () => {
           path="/testmenu"
           element={
             <ProtectedRoute>
-              <TestsMenu />
+              {user?.role === 'psicologo' ? <TestManagement /> : <PatientTestView />}
             </ProtectedRoute>
           }
         />
         <Route
-          path="perfil_paciente"
+          path="/test/:testId"
+          element={
+            <ProtectedRoute>
+              <TestPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resultado/:resultId"
+          element={
+            <ProtectedRoute>
+              <TestResultDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/EditarPrueba/:testId"
+          element={
+            <ProtectedRoute>
+              <CrearPruebas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="perfil_paciente/:id"
           element={
             <ProtectedRoute>
               <PerfilPaciente />
@@ -124,6 +154,26 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/consultas"
+          element={
+            <ProtectedRoute>
+              <MisConsultas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pacientes"
+          element={
+            <ProtectedRoute>
+              <PacientesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/tests/:testId/preguntas/:preguntaId/opciones" element={
+          <ProtectedRoute>
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );

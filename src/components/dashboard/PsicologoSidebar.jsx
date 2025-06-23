@@ -131,7 +131,7 @@ const PsicologoSidebar = () => {
       action: () => navigate("/consultas-online"),
     },
     {
-      path: "/perfil_psicologo",
+      path: "/editarperfil",
       label: "Perfil",
       icon: (
         <svg
@@ -149,6 +149,7 @@ const PsicologoSidebar = () => {
           />
         </svg>
       ),
+      action: () => navigate("/editarperfil"),
     },
     {
       path: "/help",

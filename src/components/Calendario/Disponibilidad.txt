@@ -1,0 +1,256 @@
+import React, { useState, useEffect } from 'react'
+import { format, parseISO, isAfter } from 'date-fns'
+import { es } from 'date-fns/locale'
+import MyCalendar from './Calendar2'
+import disponibilidadService from '../../services/disponibilidadService'
+import { toast } from 'react-toastify'
+import PsicologoSidebar from '../dashboard/PsicologoSidebar'
+
+// Renderiza sólo el title dentro del bloque del calendario
+const CustomEvent = ({ event }) => (
+  <div className="bg-indigo-800 text-white rounded p-1 text-xs text-center">
+    {event.title}
+  </div>
+)
+
+export default function Disponibilidad() {
+  // datos
+  const [disponibilidades, setDisponibilidades] = useState([])
+  const [eventos, setEventos]                   = useState([])
+
+  // loading / error
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError]         = useState(null)
+
+  // formulario
+  const [nueva, setNueva] = useState({
+    fecha:      '',
+    horaInicio: '08:00',
+    horaFin:    '09:00',
+    activo:     true
+  })
+  const [editingId, setEditingId] = useState(null)
+
+  // 1) al montar → traigo la lista
+  useEffect(() => {
+    fetchDisponibilidades()
+  }, [])
+
+  // 2) cuando cambian las disponibilidades → construyo eventos individuales
+  useEffect(() => {
+    const evs = disponibilidades
+      .filter(d => d.fecha)              // sólo los que tengan fecha definida
+      .map(disp => {
+        let date
+        try {
+          date = parseISO(disp.fecha)
+        } catch {
+          return null
+        }
+        if (!(date instanceof Date) || isNaN(date)) return null
+
+        const [h0,m0] = disp.horaInicio.split(':')
+        const [h1,m1] = disp.horaFin.split(':')
+        const start = new Date(date)
+        start.setHours(+h0, +m0, 0, 0)
+        const end = new Date(date)
+        end.setHours(+h1, +m1, 0, 0)
+
+        return {
+          id:    disp.id,
+          title: `Disponible: ${disp.horaInicio} - ${disp.horaFin}`,
+          start,
+          end
+        }
+      })
+      .filter(Boolean)
+
+    setEventos(evs)
+  }, [disponibilidades])
+
+  // API calls
+  async function fetchDisponibilidades() {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await disponibilidadService.getDisponibilidades()
+      setDisponibilidades(data)
+    } catch (e) {
+      setError('No pude cargar tus disponibilidades.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    try {
+      if (editingId) {
+        await disponibilidadService.updateDisponibilidad(editingId, nueva)
+        toast.success('Disponibilidad actualizada')
+      } else {
+        await disponibilidadService.createDisponibilidad(nueva)
+        toast.success('Disponibilidad creada')
+      }
+      setEditingId(null)
+      // reset, incluyendo fecha
+      setNueva({
+        fecha:      '',
+        horaInicio: '08:00',
+        horaFin:    '09:00',
+        activo:     true
+      })
+      fetchDisponibilidades()
+    } catch (err) {
+      toast.error(err.message || 'Error al guardar')
+    }
+  }
+
+  function handleEdit(disp) {
+    setEditingId(disp.id)
+    setNueva({
+      fecha:      disp.fecha,
+      horaInicio: disp.horaInicio,
+      horaFin:    disp.horaFin,
+      activo:     disp.activo
+    })
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm('¿Eliminar?')) return
+    await disponibilidadService.deleteDisponibilidad(id)
+    fetchDisponibilidades()
+  }
+
+  function handleInputChange(e) {
+    const { name, value, type, checked } = e.target
+    setNueva(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <PsicologoSidebar />
+
+      <div className="flex-1">
+        <header className="px-8 py-6 border-b bg-white">
+          <h1 className="text-2xl font-bold">Mi Disponibilidad</h1>
+        </header>
+
+        <div className="p-8 space-y-8">
+          {/* Formulario */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">
+              {editingId ? 'Editar Disponibilidad' : 'Nueva Disponibilidad'}
+            </h2>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Fecha */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Fecha</label>
+                <input
+                  type="date"
+                  name="fecha"
+                  value={nueva.fecha}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              {/* Hora inicio */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Hora inicio</label>
+                <input
+                  type="time"
+                  name="horaInicio"
+                  value={nueva.horaInicio}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              {/* Hora fin */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Hora fin</label>
+                <input
+                  type="time"
+                  name="horaFin"
+                  value={nueva.horaFin}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              {/* Activo + botón */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="activo"
+                  checked={nueva.activo}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                <label className="mr-auto">Disponible</label>
+                <button
+                  type="submit"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded"
+                >
+                  {editingId ? 'Actualizar' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Tabla */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Mis Disponibilidades</h2>
+            {isLoading ? (
+              <p>Cargando…</p>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : (
+              <table className="min-w-full divide-y">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs">Fecha</th>
+                    <th className="px-4 py-2 text-left text-xs">Inicio</th>
+                    <th className="px-4 py-2 text-left text-xs">Fin</th>
+                    <th className="px-4 py-2 text-left text-xs">Activo</th>
+                    <th className="px-4 py-2 text-left text-xs">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {disponibilidades.map(disp => (
+                    <tr key={disp.id}>
+                      <td className="px-4 py-2">
+                        {disp.fecha
+                          ? format(parseISO(disp.fecha), 'EEEE, dd/MM/yyyy', { locale: es })
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-2">{disp.horaInicio}</td>
+                      <td className="px-4 py-2">{disp.horaFin}</td>
+                      <td className="px-4 py-2">{disp.activo ? 'Sí' : 'No'}</td>
+                      <td className="px-4 py-2 flex gap-2">
+                        <button onClick={() => handleEdit(disp)} className="text-blue-600">Editar</button>
+                        <button onClick={() => handleDelete(disp.id)} className="text-red-600">Eliminar</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Calendario */}
+          <div className="bg-white shadow rounded-lg p-6 overflow-hidden">
+            <h2 className="text-lg font-semibold mb-4">Vista del Calendario</h2>
+            <div className="h-[500px] overflow-auto">
+              <MyCalendar events={eventos} components={{ event: CustomEvent }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

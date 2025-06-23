@@ -14,6 +14,7 @@ import { ForgotPassword } from "./components/auth/ForgotPassword";
 import { CrearPruebas } from "./components/test/CrearPruebas.jsx";
 import ResetPassword from "./components/auth/ResetPassword";
 import ReservaCita from "./components/sesion/ReservaCita.jsx";
+import GenerarInforme from "./components/sesion/GenerarInforme.jsx";
 import Disponibilidad from "./components/Calendario/Disponibilidad.jsx";
 import MainPage from "./pages/mainpage.jsx";
 import DashboardContainer from "./components/dashboard/DashboardContainer";
@@ -25,6 +26,7 @@ import TestManagement from "./components/test/TestManagement";
 import PatientTestView from "./components/test/PatientTestView";
 import TestPage from "./components/test/TestPage";
 import TestResultDetail from "./components/test/TestResultDetail";
+import EditarPerfil from "./pages/EditarPerfil"; 
 
 // Componente protegido para páginas que requieren autenticación
 const ProtectedRoute = ({ children }) => {
@@ -76,6 +78,17 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/ginforme"
+          element={
+            <ProtectedRoute>
+              <GenerarInforme />
+            </ProtectedRoute>
+          }
+        />
+
+        
         <Route
           path="/disponibilidad"
           element={
@@ -129,16 +142,20 @@ const AppContent = () => {
         <Route
           path="perfil_paciente/:id"
           element={
-            <ProtectedRoute>
-              <PerfilPaciente />
-            </ProtectedRoute>
+              user ? <Navigate to="/dashboard" /> :<PerfilPaciente />
           }
         />
         <Route
           path="perfil_psicologo"
           element={
+              user ? <Navigate to="/dashboard" /> :<PerfilPsicologo />
+          }
+        />
+        <Route
+          path="/editarperfil"
+          element={
             <ProtectedRoute>
-              <PerfilPsicologo />
+              <EditarPerfil userData={useAuth().user} />
             </ProtectedRoute>
           }
         />

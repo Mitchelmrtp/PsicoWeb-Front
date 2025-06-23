@@ -197,21 +197,26 @@ export default function GeneralContent() {
       </div>
 
       {/* Card General */}
-      <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <h3 className="font-bold">General</h3>
-        <div className="flex items-center gap-4">
-          <button className="border px-4 py-1 rounded bg-blue-100 text-blue-700">
-            Cambiar Contraseña
-          </button>
-          <div className="flex items-center gap-2">
-            <span>Notificaciones</span>
-            <label className="inline-flex relative items-center cursor-pointer">
-              <input type="checkbox" defaultChecked className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-        </div>
-      </div>
+<div className="bg-white p-6 rounded-xl shadow space-y-4">
+  <h3 className="font-bold text-lg">General</h3>
+  <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center gap-4">
+      <span className="text-gray-700">Cambiar Contraseña</span>
+      <button className="border px-4 py-1 rounded text-blue-600 hover:bg-blue-100">
+        Cambiar
+      </button>
+    </div>
+    <div className="flex items-center gap-2">
+      <span>Notificaciones</span>
+      <label className="inline-flex relative items-center cursor-pointer">
+        <input type="checkbox" defaultChecked className="sr-only peer" />
+        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600"></div>
+      </label>
+    </div>
+  </div>
+</div>
+
+
     </div>
   );
 }

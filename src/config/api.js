@@ -1,6 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
 
 export const ENDPOINTS = {
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3005/api',
   LOGIN: `${API_URL}/login`,
   REGISTER: `${API_URL}/register`,
   PROFILE: `${API_URL}/profile`,
@@ -31,6 +32,25 @@ export const getAuthHeader = () => {
         console.warn('No authentication token found');
         return {};
     }
+    
+    // Check if token is expired (basic check)
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Date.now() / 1000;
+        
+        if (payload.exp && payload.exp < currentTime) {
+            console.warn('Token has expired');
+            // Clear expired token
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Optionally redirect to login or show notification
+            return {};
+        }
+    } catch (error) {
+        console.error('Error decoding token:', error);
+        return {};
+    }
+    
     return { 'Authorization': `Bearer ${token}` };
 };
 

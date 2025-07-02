@@ -158,6 +158,75 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route 
+          path="/help"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Centro de Ayuda</h2>
+                  <p className="text-gray-600 mb-4">
+                    Bienvenido al centro de ayuda de PsicoWeb. Aquí encontrarás recursos para usar la plataforma.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <h3 className="font-semibold text-blue-900">Para Pacientes</h3>
+                      <p className="text-blue-700 text-sm">Cómo reservar citas y acceder a recursos</p>
+                    </div>
+                    <div className="p-3 bg-green-50 rounded-lg">
+                      <h3 className="font-semibold text-green-900">Para Psicólogos</h3>
+                      <p className="text-green-700 text-sm">Gestión de pacientes y herramientas profesionales</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/calendario"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Calendario</h2>
+                  <p className="text-gray-600 mb-4">
+                    Gestión de citas y disponibilidad.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Esta funcionalidad está en desarrollo.
+                  </p>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/consultas-online"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Consultas Online</h2>
+                  <p className="text-gray-600 mb-4">
+                    Acceso a consultas virtuales y sesiones en línea.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Esta funcionalidad está en desarrollo.
+                  </p>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/perfil_paciente"
+          element={
+            <ProtectedRoute>
+              <PerfilPaciente />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/tests/:testId/preguntas/:preguntaId/opciones" element={
           <ProtectedRoute>
           </ProtectedRoute>

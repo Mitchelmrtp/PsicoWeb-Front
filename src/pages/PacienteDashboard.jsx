@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import SidebarManager from '../components/dashboard/SidebarManager';
 import { ENDPOINTS, getAuthHeader } from '../config/api';
+import { debugAuth } from '../utils/authDebug';
+import { testAPI } from '../utils/apiTest';
+import EmptyAppointments from '../components/common/EmptyAppointments';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -16,6 +19,81 @@ const PacienteDashboard = () => {
   const [loadingPsychologists, setLoadingPsychologists] = useState(true);
   const [error, setError] = useState(null);
   
+  // Debug authentication on component mount
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      debugAuth.runFullCheck();
+      // Make test API available in console
+      window.testAPI = testAPI;
+      
+      // Add debug function for patient dashboard
+      window.debugPatientDashboard = async function() {
+        console.log('🔍 Debugging Patient Dashboard...');
+        
+        // Check authentication
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        console.log('🔐 Auth Status:', {
+          hasToken: !!token,
+          tokenPreview: token ? token.substring(0, 20) + '...' : null,
+          user: user
+        });
+        
+        if (!token) {
+          console.error('❌ No token found');
+          return;
+        }
+        
+        // Test API endpoint directly
+        const today = new Date().toISOString().split('T')[0];
+        const url = `${ENDPOINTS.SESIONES}?startDate=${today}&estado=programada`;
+        
+        console.log('📡 Testing API call:', url);
+        
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          console.log('📡 Response status:', response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ API Response:', data);
+            console.log(`Found ${data.length} appointments`);
+            
+            // Process each appointment
+            data.forEach((appointment, index) => {
+              console.log(`📅 Appointment ${index + 1}:`, {
+                id: appointment.id,
+                fecha: appointment.fecha,
+                horaInicio: appointment.horaInicio,
+                horaFin: appointment.horaFin,
+                estado: appointment.estado,
+                psicologo: appointment.Psicologo ? {
+                  id: appointment.Psicologo.id,
+                  user: appointment.Psicologo.User
+                } : null
+              });
+            });
+          } else {
+            const errorData = await response.json();
+            console.error('❌ API Error:', errorData);
+          }
+        } catch (error) {
+          console.error('❌ Request failed:', error);
+        }
+      };
+      
+      console.log('🛠️ Debug function loaded. Run window.debugPatientDashboard() to test');
+    }
+  }, []);
+  
   // Check if backend is accessible
   useEffect(() => {
     const checkBackendConnection = async () => {
@@ -28,6 +106,9 @@ const PacienteDashboard = () => {
         if (!response.ok) {
           console.warn('Backend health check failed:', response.status);
           toast.warning('La conexión con el servidor no es óptima');
+        } else {
+          const data = await response.json();
+          console.log('Backend health check successful:', data);
         }
       } catch (err) {
         console.error('Backend connection failed:', err);
@@ -43,11 +124,21 @@ const PacienteDashboard = () => {
     const fetchAppointments = async () => {
       try {
         setLoadingAppointments(true);
+        setError(null);
+        
+        // Check if user is authenticated
+        if (!user) {
+          console.warn('User not authenticated, redirecting to login');
+          navigate('/login');
+          return;
+        }
         
         // Get today's date in YYYY-MM-DD format for filtering
         const today = new Date().toISOString().split('T')[0];
         
-        // Fetch scheduled appointments - only get upcoming appointments
+        console.log('Fetching appointments for user:', user.id, 'starting from:', today);
+        
+        // Use direct fetch with getAuthHeader for consistency
         const response = await fetch(`${ENDPOINTS.SESIONES}?startDate=${today}&estado=programada`, {
           method: 'GET',
           headers: {
@@ -55,18 +146,39 @@ const PacienteDashboard = () => {
             ...getAuthHeader(),
           },
         });
-
+        
         if (!response.ok) {
-          throw new Error('Error al cargar las citas');
+          if (response.status === 401) {
+            console.warn('Unauthorized, redirecting to login');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/login');
+            return;
+          }
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-
+        
         const data = await response.json();
-        console.log('Appointment data from backend:', data);
+        console.log('✅ Appointment data from backend:', data);
+        console.log(`📊 Found ${data.length} appointments for patient`);
+        
+        if (data.length === 0) {
+          console.log('ℹ️ No appointments found for this patient');
+          setUpcomingAppointments([]);
+          setError(null);
+          setLoadingAppointments(false);
+          return;
+        }
         
         // Map backend data to the format expected by our UI
         const formattedAppointments = data.map(appointment => {
           // Check the structure of your data for debugging
-          console.log('Appointment Psicologo data:', appointment.Psicologo);
+          console.log('Processing appointment:', {
+            id: appointment.id,
+            fecha: appointment.fecha,
+            horaInicio: appointment.horaInicio,
+            psicologo: appointment.Psicologo
+          });
           
           // Extract psychologist name correctly
           let doctorName = 'Psicólogo Asignado';
@@ -77,33 +189,39 @@ const PacienteDashboard = () => {
               const firstName = appointment.Psicologo.User.first_name || '';
               const lastName = appointment.Psicologo.User.last_name || '';
               if (firstName || lastName) {
-                doctorName = `Psic. ${firstName} ${lastName}`;
+                doctorName = `Psic. ${firstName} ${lastName}`.trim();
               }
             } 
             // Direct access if first_name and last_name are directly on Psicologo
             else if (appointment.Psicologo.first_name || appointment.Psicologo.last_name) {
               const firstName = appointment.Psicologo.first_name || '';
               const lastName = appointment.Psicologo.last_name || '';
-              doctorName = `Psic. ${firstName} ${lastName}`;
+              doctorName = `Psic. ${firstName} ${lastName}`.trim();
             }
           }
           
+          console.log('Extracted doctor name:', doctorName);
+          
           return {
             id: appointment.id,
-            doctor: doctorName.trim(),
+            doctor: doctorName,
             fecha: appointment.fecha,
             date: new Date(`${appointment.fecha}T${appointment.horaInicio}`),
-            endTime: new Date(`${appointment.fecha}T${appointment.horaFin}`),
+            endTime: new Date(`${appointment.fecha}T${appointment.horaFin || appointment.horaInicio}`),
             estado: appointment.estado,
-            psicologoId: appointment.idPsicologo
+            psicologoId: appointment.idPsicologo,
+            time: appointment.horaInicio,
+            endTimeString: appointment.horaFin
           };
         });
         
         // Sort appointments by date and time
         formattedAppointments.sort((a, b) => a.date - b.date);
         
+        console.log('Final formatted appointments:', formattedAppointments);
         setUpcomingAppointments(formattedAppointments);
         setError(null);
+        
       } catch (err) {
         console.error('Error fetching appointments:', err);
         setError('No se pudieron cargar las citas programadas');
@@ -114,7 +232,7 @@ const PacienteDashboard = () => {
     };
 
     fetchAppointments();
-  }, []);
+  }, [user, navigate]);
 
   // Fetch recommended psychologists
   useEffect(() => {
@@ -455,19 +573,7 @@ const PacienteDashboard = () => {
                 {error}. Por favor intente de nuevo más tarde.
               </div>
             ) : upcomingAppointments.length === 0 ? (
-              <div className="bg-white rounded-lg shadow p-6 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <h4 className="text-lg font-medium text-gray-700 mb-2">No tienes citas programadas</h4>
-                <p className="text-gray-500 mb-4">Reserva una cita con uno de nuestros psicólogos profesionales</p>
-                <button 
-                  onClick={() => navigate('/reserva')}
-                  className="bg-indigo-800 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-900 transition-colors"
-                >
-                  Reservar Cita
-                </button>
-              </div>
+              <EmptyAppointments userType={user?.userType || user?.role} />
             ) : (
               <div className="space-y-4">
                 {Object.entries(appointmentsByMonth).map(([month, appointments]) => (

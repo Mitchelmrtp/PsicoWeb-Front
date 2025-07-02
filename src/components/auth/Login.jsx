@@ -16,6 +16,10 @@ export const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (loading) return;
+    
     setLoading(true);
     setError("");
 
@@ -29,7 +33,8 @@ export const LoginForm = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      navigate("/PagPrincipal");
+      // Navigate to dashboard instead of non-existent route
+      navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Error al iniciar sesión");

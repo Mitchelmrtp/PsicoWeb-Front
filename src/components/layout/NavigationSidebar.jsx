@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { NAVIGATION_ROUTES } from '../../routes/routePaths';
 import { Button } from '../ui';
+import promotionalImage from '../../assets/promotional.png';
 
 // Iconos como componentes para mejor organización
 const Icons = {
@@ -59,6 +60,7 @@ const Icons = {
 const NavigationSidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -66,6 +68,11 @@ const NavigationSidebar = () => {
   const navigationItems = user.role === 'psicologo' 
     ? NAVIGATION_ROUTES.PSYCHOLOGIST 
     : NAVIGATION_ROUTES.PATIENT;
+
+  // Función para manejar el click del botón "Iniciar Prueba"
+  const handleStartTest = () => {
+    navigate('/testmenu');
+  };
 
   return (
     <div className="w-full max-w-[220px] h-screen bg-white border-r border-gray-200 flex flex-col">
@@ -87,7 +94,7 @@ const NavigationSidebar = () => {
       </div>
 
       {/* Navegación principal */}
-      <nav className="flex-1 px-4">
+      <nav className="flex-1 px-4 py-2">
         <ul className="space-y-1">
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -111,8 +118,8 @@ const NavigationSidebar = () => {
         </ul>
       </nav>
 
-      {/* Footer con información del usuario y logout */}
-      <div className="border-t border-gray-200 p-4">
+      {/* Información del usuario y logout - justo antes de la imagen */}
+      <div className="border-t border-gray-200 px-4 py-4">
         <div className="flex items-center mb-3">
           <div className="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center">
             <span className="text-indigo-800 font-semibold text-sm">
@@ -141,6 +148,39 @@ const NavigationSidebar = () => {
           Cerrar sesión
         </Button>
       </div>
+
+      {/* Promotional box - Solo para pacientes, al final */}
+      {user.role === 'paciente' && (
+        <div className="mx-4 mb-4">
+          <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+            {/* Doctor image at the top - más alta para verse completa */}
+            <div className="h-40 w-full">
+              <img 
+                src={promotionalImage} 
+                alt="Doctora" 
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+            
+            {/* Dark bottom section with rounded top corners */}
+            <div className="bg-gray-800 p-4 text-center rounded-t-3xl -mt-4 relative">
+              <div className="mb-3 text-white">
+                <p className="font-medium text-base leading-tight">Terapia rápida</p>
+                <p className="text-base leading-tight">y</p>
+                <p className="font-medium text-base leading-tight">eficaz</p>
+              </div>
+              
+              <button 
+                onClick={handleStartTest}
+                className="bg-cyan-400 hover:bg-cyan-500 text-gray-800 font-medium py-2 px-6 rounded-lg transition-colors duration-200 text-sm w-full"
+              >
+                Iniciar Prueba
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

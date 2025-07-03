@@ -1,4 +1,5 @@
 import { ENDPOINTS, getAuthHeader } from '../config/api';
+import { handleApiResponse, getErrorMessage } from '../utils/apiResponseHandler';
 
 class DisponibilidadService {
   async getDisponibilidades() {
@@ -13,10 +14,11 @@ class DisponibilidadService {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al obtener disponibilidades');
+        throw new Error(getErrorMessage(error) || 'Error al obtener disponibilidades');
       }
       
-      return await response.json();
+      const data = await response.json();
+      return handleApiResponse(data);
     } catch (error) {
       console.error('Error obteniendo disponibilidades:', error);
       throw error;
@@ -36,10 +38,11 @@ class DisponibilidadService {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al crear disponibilidad');
+        throw new Error(getErrorMessage(error) || 'Error al crear disponibilidad');
       }
       
-      return await response.json();
+      const data = await response.json();
+      return handleApiResponse(data);
     } catch (error) {
       console.error('Error creando disponibilidad:', error);
       throw error;
@@ -59,10 +62,11 @@ class DisponibilidadService {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al actualizar disponibilidad');
+        throw new Error(getErrorMessage(error) || 'Error al actualizar disponibilidad');
       }
       
-      return await response.json();
+      const data = await response.json();
+      return handleApiResponse(data);
     } catch (error) {
       console.error('Error actualizando disponibilidad:', error);
       throw error;
@@ -81,10 +85,11 @@ class DisponibilidadService {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al eliminar disponibilidad');
+        throw new Error(getErrorMessage(error) || 'Error al eliminar disponibilidad');
       }
       
-      return await response.json();
+      const data = await response.json();
+      return handleApiResponse(data);
     } catch (error) {
       console.error('Error eliminando disponibilidad:', error);
       throw error;
@@ -103,10 +108,11 @@ class DisponibilidadService {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al obtener disponibilidad del psicólogo');
+        throw new Error(getErrorMessage(error) || 'Error al obtener disponibilidad del psicólogo');
       }
       
-      return await response.json();
+      const data = await response.json();
+      return handleApiResponse(data);
     } catch (error) {
       console.error('Error obteniendo disponibilidad del psicólogo:', error);
       throw error;

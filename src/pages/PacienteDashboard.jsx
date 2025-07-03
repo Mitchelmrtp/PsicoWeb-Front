@@ -160,9 +160,12 @@ const PacienteDashboard = () => {
         
         const data = await response.json();
         console.log('✅ Appointment data from backend:', data);
-        console.log(`📊 Found ${data.length} appointments for patient`);
         
-        if (data.length === 0) {
+        // Handle the new Clean Architecture response structure
+        const appointmentsArray = data.data || data;
+        console.log(`📊 Found ${appointmentsArray.length} appointments for patient`);
+        
+        if (appointmentsArray.length === 0) {
           console.log('ℹ️ No appointments found for this patient');
           setUpcomingAppointments([]);
           setError(null);
@@ -171,7 +174,7 @@ const PacienteDashboard = () => {
         }
         
         // Map backend data to the format expected by our UI
-        const formattedAppointments = data.map(appointment => {
+        const formattedAppointments = appointmentsArray.map(appointment => {
           // Check the structure of your data for debugging
           console.log('Processing appointment:', {
             id: appointment.id,
@@ -253,11 +256,14 @@ const PacienteDashboard = () => {
 
         const data = await response.json();
         
+        // Handle the new Clean Architecture response structure
+        const psychologistsArray = data.data || data;
+        
         // First, log the raw data structure coming from backend
-        console.log('Raw psychologist data from API:', data);
+        console.log('Raw psychologist data from API:', psychologistsArray);
 
         // Map backend data to the format expected by UI
-        const formattedPsychologists = data.slice(0, 3).map(psych => {
+        const formattedPsychologists = psychologistsArray.slice(0, 3).map(psych => {
           // Extract psychologist name correctly
           let psychName = 'Psicólogo';
           
@@ -421,9 +427,11 @@ const PacienteDashboard = () => {
           }
 
           const data = await response.json();
+          // Handle the new Clean Architecture response structure
+          const appointmentsArray = data.data || data;
           // Process data and update state as in your original code
           // (Simplified for brevity)
-          const formattedAppointments = data.map(appointment => {
+          const formattedAppointments = appointmentsArray.map(appointment => {
             // Check the structure of your data for debugging
             console.log('Appointment Psicologo data:', appointment.Psicologo);
             

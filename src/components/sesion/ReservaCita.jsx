@@ -38,8 +38,11 @@ const ReservaCita = () => {
       const data = await response.json();
       console.log('Raw psychologist data from API:', data);
       
+      // Handle the new Clean Architecture response structure
+      const psicologosArray = data.data || data;
+      
       // Format the psychologist data properly
-      const formattedPsicologos = data.map(psicologo => {
+      const formattedPsicologos = psicologosArray.map(psicologo => {
         let displayName = 'Psicólogo';
         
         // Extract name from correct data structure

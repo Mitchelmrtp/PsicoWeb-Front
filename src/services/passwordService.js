@@ -1,4 +1,5 @@
 import { ENDPOINTS } from '../config/api';
+import { handleApiResponse, getErrorMessage } from '../utils/apiResponseHandler';
 
 const forgotPassword = async (email) => {
   const res = await fetch(`${ENDPOINTS.FORGOT_PASSWORD}`, {
@@ -8,8 +9,9 @@ const forgotPassword = async (email) => {
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Error al solicitar restablecimiento');
-  return data;
+  if (!res.ok) throw new Error(getErrorMessage(data) || 'Error al solicitar restablecimiento');
+  
+  return handleApiResponse(data);
 };
 
 export default {

@@ -9,11 +9,11 @@ export const ENDPOINTS = {
   RESET_PASSWORD: `${API_URL}/reset-password`,
   // Endpoints para psicólogos
   PSICOLOGOS: `${API_URL}/psicologos`,
-  PSICOLOGO_PROFILE: `${API_URL}/psicologos/profile`,
+  PSICOLOGO_PROFILE: `${API_URL}/psicologo/profile`,
   PSICOLOGO_PACIENTES: `${API_URL}/psicologos/pacientes`,
   // Endpoints para pacientes
   PACIENTES: `${API_URL}/pacientes`,
-  PACIENTE_PROFILE: `${API_URL}/pacientes/profile`,
+  PACIENTE_PROFILE: `${API_URL}/paciente/profile`,
   // Endpoints para sesiones
   SESIONES: `${API_URL}/sesiones`,
   // Endpoints para calendario

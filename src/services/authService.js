@@ -17,13 +17,20 @@ class AuthService {
                 throw new Error(data.message || 'Error al iniciar sesión');
             }
             
+            // Handle the new response structure from Clean Architecture
+            const loginData = data.data || data; // Support both old and new structure
+            
             // Guardar el token
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+            if (loginData.token) {
+                localStorage.setItem('token', loginData.token);
+                localStorage.setItem('user', JSON.stringify(loginData.user));
             }
             
-            return data;
+            return {
+                token: loginData.token,
+                user: loginData.user,
+                message: loginData.message || data.message
+            };
         } catch (error) {
             console.error('Login error:', error);
             throw error;
@@ -51,13 +58,20 @@ class AuthService {
             throw new Error(data.message || 'Error en el registro');
         }
         
+        // Handle the new response structure from Clean Architecture
+        const registerData = data.data || data; // Support both old and new structure
+        
         // Guardar el token
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+        if (registerData.token) {
+            localStorage.setItem('token', registerData.token);
+            localStorage.setItem('user', JSON.stringify(registerData.user));
         }
         
-        return data;
+        return {
+            token: registerData.token,
+            user: registerData.user,
+            message: registerData.message || data.message
+        };
     } catch (error) {
         console.error('Register error:', error);
         throw error;

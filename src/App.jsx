@@ -17,8 +17,8 @@ import ReservaCita from "./components/sesion/ReservaCita.jsx";
 import Disponibilidad from "./components/Calendario/Disponibilidad.jsx";
 import MainPage from "./pages/mainpage.jsx";
 import DashboardContainer from "./components/dashboard/DashboardContainer";
-import PerfilPsicologo from "./components/auth/ProfilePsico.jsx";
-import PerfilPaciente from "./components/auth/ProfileUser.jsx";
+import PerfilPsicologo from "./components/auth/PerfilPsicologo.jsx";
+import PerfilPaciente from "./components/auth/PerfilPaciente.jsx";
 import MisConsultas from "./pages/MisConsultas";
 import PacientesPage from "./pages/PacientesPage";
 import TestManagement from "./components/test/TestManagement";
@@ -224,6 +224,22 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <PerfilPaciente />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/perfil-paciente"
+          element={
+            <ProtectedRoute>
+              <PerfilPaciente />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/perfil-psicologo"
+          element={
+            <ProtectedRoute>
+              <PerfilPsicologo />
             </ProtectedRoute>
           }
         />

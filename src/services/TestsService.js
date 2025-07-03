@@ -1,3 +1,5 @@
+import { handleApiResponse } from '../utils/apiResponseHandler.js';
+
 export async function enviarResultados(apiEndpoint, respuestas) {
   const res = await fetch(apiEndpoint, {
     method: 'POST',
@@ -5,11 +7,13 @@ export async function enviarResultados(apiEndpoint, respuestas) {
     body: JSON.stringify({ respuestas }),
   });
   if (!res.ok) throw new Error('Error en servidor');
-  return await res.json();
+  
+  const data = await res.json();
+  return handleApiResponse(data);
 }
 
 export function adaptarRespuestaBackend(data) {
   return {
-    mensaje: data.mensaje || '',
+    mensaje: data.mensaje || data.message || '',
   };
 }

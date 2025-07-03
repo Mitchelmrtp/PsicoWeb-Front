@@ -55,8 +55,11 @@ const PsicologoDashboard = () => {
         const data = await response.json();
         console.log('Appointment data from backend:', data);
         
+        // Handle the new Clean Architecture response structure
+        const appointmentsArray = data.data || data; // Extract the actual data array
+        
         // Format appointments for UI
-        const formattedAppointments = data.map(appointment => {
+        const formattedAppointments = appointmentsArray.map(appointment => {
           const startDate = parseISO(`${appointment.fecha}T${appointment.horaInicio}`);
           const endDate = appointment.horaFin 
             ? parseISO(`${appointment.fecha}T${appointment.horaFin}`)
@@ -124,8 +127,11 @@ const PsicologoDashboard = () => {
         const data = await response.json();
         console.log('Patient data from backend:', data);
         
+        // Handle the new Clean Architecture response structure
+        const patientsArray = data.data || data; // Extract the actual data array
+        
         // Process patient data
-        const processedPatients = data.map(patient => ({
+        const processedPatients = patientsArray.map(patient => ({
           id: patient.id,
           first_name: patient.first_name,
           last_name: patient.last_name,

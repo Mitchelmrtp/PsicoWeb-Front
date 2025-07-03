@@ -149,6 +149,7 @@ const PsicologoSidebar = () => {
           />
         </svg>
       ),
+      action: () => navigate("/perfil_psicologo"),
     },
     {
       path: "/help",

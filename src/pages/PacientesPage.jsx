@@ -49,13 +49,16 @@ const PacientesPage = () => {
         const data = await response.json();
         console.log('Patient data from backend:', data);
         
+        // Handle the new Clean Architecture response structure
+        const patientsArray = data.data || data;
+        
         // Handle empty array case
-        if (Array.isArray(data) && data.length === 0) {
+        if (Array.isArray(patientsArray) && patientsArray.length === 0) {
           console.log('No patients found for this psychologist');
         }
         
         // Process patient data
-        const processedPatients = Array.isArray(data) ? data.map(patient => ({
+        const processedPatients = Array.isArray(patientsArray) ? patientsArray.map(patient => ({
           id: patient.id,
           first_name: patient.first_name || 'Sin nombre',
           last_name: patient.last_name || 'Sin apellido',

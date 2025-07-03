@@ -1,80 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ENDPOINTS, getAuthHeader } from '../../config/api';
-import { toast } from 'react-toastify';
-import { useAuth } from '../../hooks/useAuth';
+/**
+ * Presenter component para TestResultDetail
+ * Implementa Container/Presenter pattern - solo lógica de presentación
+ */
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const TestResultDetail = () => {
-  const { resultId } = useParams();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchResultDetail = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${ENDPOINTS.RESULTADOS}/${resultId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Error al cargar el resultado');
-        }
-
-        const data = await response.json();
-        console.log('Result data:', data);
-        
-        const resultData = data.data || data;
-        if (!resultData || !resultData.Prueba) {
-          throw new Error('Datos de resultado incompletos');
-        }
-        
-        setResult(resultData);
-      } catch (err) {
-        console.error('Error loading test result:', err);
-        setError(err.message || 'Error al cargar el resultado de la prueba');
-        toast.error('Error al cargar el resultado');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResultDetail();
-  }, [resultId]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error || !result) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
-          <p>{error || 'No se pudo cargar el resultado de la prueba'}</p>
-          <button
-            onClick={() => navigate('/testmenu')}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Volver
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+const TestResultDetailPresenter = ({ result, onGoBack }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -93,7 +24,9 @@ const TestResultDetail = () => {
           <div className="bg-blue-600 text-white p-6">
             <h1 className="text-2xl font-bold">{result.Prueba.titulo}</h1>
             <p className="mt-2 opacity-90">{result.Prueba.descripcion}</p>
-            <p className="mt-2 text-sm">Realizado el: {formatDate(result.fechaRealizacion || result.createdAt)}</p>
+            <p className="mt-2 text-sm">
+              Realizado el: {formatDate(result.fechaRealizacion || result.createdAt)}
+            </p>
           </div>
 
           {/* Resumen de resultados */}
@@ -154,7 +87,7 @@ const TestResultDetail = () => {
           {/* Botón de volver */}
           <div className="p-6 bg-gray-50">
             <button
-              onClick={() => navigate('/testmenu')}
+              onClick={onGoBack}
               className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Volver al menú de pruebas
@@ -166,4 +99,26 @@ const TestResultDetail = () => {
   );
 };
 
-export default TestResultDetail;
+TestResultDetailPresenter.propTypes = {
+  result: PropTypes.shape({
+    Prueba: PropTypes.shape({
+      titulo: PropTypes.string.isRequired,
+      descripcion: PropTypes.string,
+    }).isRequired,
+    fechaRealizacion: PropTypes.string,
+    createdAt: PropTypes.string,
+    puntuacionTotal: PropTypes.number,
+    puntuacionPromedio: PropTypes.number,
+    interpretacion: PropTypes.string,
+    respuestas: PropTypes.arrayOf(PropTypes.shape({
+      idPregunta: PropTypes.string,
+      pregunta: PropTypes.string,
+      respuesta: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      opciones: PropTypes.array,
+      puntuacion: PropTypes.number,
+    })),
+  }).isRequired,
+  onGoBack: PropTypes.func.isRequired,
+};
+
+export default TestResultDetailPresenter;

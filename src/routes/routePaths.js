@@ -5,6 +5,7 @@ export const ROUTE_PATHS = {
   // Rutas públicas
   HOME: "/",
   MAIN_PAGE: "/mainpage",
+  SEARCH: "/search",
   
   // Autenticación
   LOGIN: "/login",

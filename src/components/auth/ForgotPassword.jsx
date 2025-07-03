@@ -3,7 +3,7 @@ import { useState } from "react";
 import Input from "../common/Input";
 import Button from "../common/Button";
 import FormError from "../common/FormError";
-import authService from "../../services/authService";
+import { authService } from "../../services/api";
 import { Link } from "react-router-dom";
 
 export const ForgotPassword = () => {

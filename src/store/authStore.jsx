@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
-import authService from '../services/authService';
+import { authService } from '../services/api';
 
 // Action types siguiendo el patrón Redux
 const AUTH_ACTIONS = {

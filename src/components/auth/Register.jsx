@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import authService from "../../services/authService";
+import { authService } from "../../services/api";
 import Input from "../common/Input";
 import Button from "../common/Button";
 import FormError from "../common/FormError";

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import StepDisponibilidad from "../Calendario/StepDisponibilidad";
 import { useNavigate } from "react-router-dom";
 import StepDatosPago from "../auth/StepDatosPagos";
-import Sidebar from "../dashboard/Sidebar";
+import SidebarManager from "../dashboard/SidebarManager";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
 import { ENDPOINTS, getAuthHeader } from "../../config/api";
@@ -199,7 +199,7 @@ const ReservaCita = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar />
+      <SidebarManager />
 
       <div className="flex-1 overflow-auto p-8">
         <div className="max-w-4xl mx-auto">

@@ -11,6 +11,7 @@ import { RegisterForm } from "../components/auth/Register";
 import { ForgotPassword } from "../components/auth/ForgotPassword";
 import ResetPassword from "../components/auth/ResetPassword";
 import MainPage from "../pages/mainpage.jsx";
+import SearchPage from "../pages/SearchPage.jsx";
 import DashboardContainer from "../components/dashboard/DashboardContainer";
 
 // Lazy loading de páginas
@@ -22,9 +23,10 @@ const PerfilPaciente = lazy(() => import("../components/auth/PerfilPaciente.jsx"
 const MisConsultas = lazy(() => import("../pages/MisConsultas"));
 const PacientesPage = lazy(() => import("../pages/PacientesPage"));
 const TestManagement = lazy(() => import("../components/test/TestManagement"));
-const PatientTestView = lazy(() => import("../components/test/PatientTestView"));
-const TestPage = lazy(() => import("../components/test/TestPage"));
-const TestResultDetail = lazy(() => import("../components/test/TestResultDetail"));
+// Nuevos componentes refactorizados con Container/Presenter pattern
+const PatientTestViewContainer = lazy(() => import("../components/test/PatientTestViewContainer"));
+const TestPageContainer = lazy(() => import("../components/test/TestPageContainer"));
+const TestResultDetailContainer = lazy(() => import("../components/test/TestResultDetailContainer"));
 
 // Componente de carga
 const LoadingSpinner = () => (
@@ -69,6 +71,7 @@ const AppRoutes = () => {
         {/* Rutas públicas */}
         <Route path={ROUTE_PATHS.HOME} element={<MainPage />} />
         <Route path={ROUTE_PATHS.MAIN_PAGE} element={<MainPage />} />
+        <Route path={ROUTE_PATHS.SEARCH} element={<SearchPage />} />
         
         {/* Rutas de autenticación */}
         <Route
@@ -139,7 +142,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.TEST_MENU}
           element={
             <ProtectedRoute>
-              {user?.role === 'psicologo' ? <TestManagement /> : <PatientTestView />}
+              {user?.role === 'psicologo' ? <TestManagement /> : <PatientTestViewContainer />}
             </ProtectedRoute>
           }
         />
@@ -147,7 +150,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.TEST_PAGE}
           element={
             <ProtectedRoute>
-              <TestPage />
+              <TestPageContainer />
             </ProtectedRoute>
           }
         />
@@ -155,7 +158,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.RESULTADO}
           element={
             <ProtectedRoute>
-              <TestResultDetail />
+              <TestResultDetailContainer />
             </ProtectedRoute>
           }
         />
@@ -163,7 +166,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.RESULTADO_PLURAL}
           element={
             <ProtectedRoute>
-              <TestResultDetail />
+              <TestResultDetailContainer />
             </ProtectedRoute>
           }
         />

@@ -20,8 +20,20 @@ const ChatListItem = ({
   let contactInfo;
   if (isPsychologist) {
     contactInfo = chat.paciente; // Si es psicólogo, mostrar paciente
+    console.log('ChatListItem - Mostrando info de paciente (isPsychologist=true)');
   } else {
     contactInfo = chat.psicologo; // Si es paciente, mostrar psicólogo
+    console.log('ChatListItem - Mostrando info de psicólogo (isPsychologist=false)');
+  }
+  
+  // Verificación crítica - si no tenemos contactInfo, mostrar advertencia
+  if (!contactInfo) {
+    console.error(`ChatListItem - ERROR: No se encontró información del contacto para chat ${chat.id}. Datos disponibles:`, {
+      isPsychologist,
+      currentUserId,
+      'chat.paciente': chat.paciente,
+      'chat.psicologo': chat.psicologo
+    });
   }
   
   const userInfo = contactInfo?.user || {};
@@ -95,7 +107,10 @@ const ChatListItem = ({
             
             {/* Información */}
             <div>
-              <div className="font-medium text-gray-900">{displayName}</div>
+              <div className="font-medium text-gray-900">
+                {displayName}
+                {!contactInfo && <span className="text-red-500"> (Sin contacto)</span>}
+              </div>
               <div className="text-sm text-gray-500 flex items-center">
                 {isOwnMessage && <span className="mr-1 text-xs text-blue-500">Tú:</span>}
                 {getMessagePreview()}

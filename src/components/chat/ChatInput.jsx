@@ -27,13 +27,47 @@ const ChatInput = ({ onSendMessage, onSendFile, disabled = false }) => {
   // Manejar envío de archivo
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.log('ChatInput - No file selected');
+      return;
+    }
+
+    console.log('ChatInput - File selected:', { 
+      name: file.name, 
+      size: file.size, 
+      type: file.type,
+      lastModified: file.lastModified
+    });
+
+    // Alert temporal para debugging
+    alert(`Archivo seleccionado: ${file.name} (${file.type}, ${(file.size / 1024).toFixed(2)} KB)`);
 
     try {
       setSending(true);
-      await onSendFile(file);
+      console.log('ChatInput - About to call onSendFile with file:', file);
+      
+      if (!onSendFile) {
+        throw new Error('onSendFile function is not provided');
+      }
+      
+      const result = await onSendFile(file);
+      console.log('ChatInput - File sent successfully, result:', result);
+      
+      // Alert de éxito
+      alert('Archivo enviado exitosamente!');
+      
       // Limpiar input de archivo
       e.target.value = null;
+    } catch (error) {
+      console.error('ChatInput - Error sending file:', error);
+      console.error('ChatInput - Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      // Alert de error
+      alert(`Error enviando archivo: ${error.message}`);
     } finally {
       setSending(false);
     }

@@ -207,7 +207,7 @@ const ChatList = ({ onSelectChat, activeChatId }) => {
 
 ChatList.propTypes = {
   onSelectChat: PropTypes.func.isRequired,
-  activeChatId: PropTypes.number
+  activeChatId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default ChatList;

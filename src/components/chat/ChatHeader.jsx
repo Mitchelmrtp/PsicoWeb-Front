@@ -93,7 +93,7 @@ const ChatHeader = ({
         </div>
         
         {/* Acciones del chat - solo psicólogos pueden cambiar estado */}
-        {isPsychologist && (
+        {isPsychologist && onChangeStatus && (
           <div className="flex items-center gap-2">
             {estado === 'activo' && (
               <button
@@ -142,7 +142,7 @@ ChatHeader.propTypes = {
     psicologo: PropTypes.object,
     paciente: PropTypes.object
   }),
-  onChangeStatus: PropTypes.func.isRequired,
+  onChangeStatus: PropTypes.func,
   isPsychologist: PropTypes.bool.isRequired,
   onBack: PropTypes.func
 };

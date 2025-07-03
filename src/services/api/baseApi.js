@@ -62,6 +62,96 @@ class BaseApiService {
     const url = `${this.baseEndpoint}${endpoint}`;
     return this.request(url, { ...options, method: 'DELETE' });
   }
+  
+  // Método para enviar formData (para subida de archivos)
+  async postFormData(endpoint = '', formData, options = {}) {
+    const url = `${this.baseEndpoint}${endpoint}`;
+    
+    console.log('BaseApiService - postFormData ENTRY:', { 
+      baseEndpoint: this.baseEndpoint,
+      endpoint, 
+      url,
+      hasFormData: !!formData 
+    });
+    
+    if (!formData) {
+      throw new Error('FormData is required for postFormData');
+    }
+    
+    // Log FormData contents
+    console.log('BaseApiService - FormData contents:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes, ${value.type})` : value);
+    }
+    
+    const authHeader = getAuthHeader();
+    console.log('BaseApiService - Auth header:', authHeader);
+
+    try {
+      // En este caso no usamos this.request porque necesitamos omitir el Content-Type para que el navegador
+      // establezca automáticamente el boundary del formData
+      console.log('BaseApiService - About to make fetch request to:', url);
+      
+      const requestConfig = {
+        method: 'POST',
+        headers: {
+          ...authHeader,
+          ...options.headers
+        },
+        body: formData,
+        ...options
+      };
+      
+      console.log('BaseApiService - Request config:', {
+        method: requestConfig.method,
+        headers: requestConfig.headers,
+        hasBody: !!requestConfig.body
+      });
+      
+      const response = await fetch(url, requestConfig);
+      
+      console.log('BaseApiService - Response received:', { 
+        status: response.status, 
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.text();
+        } catch (e) {
+          errorData = 'Could not read error response';
+        }
+        console.error('BaseApiService - Response not ok:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
+      
+      let data;
+      try {
+        data = await response.json();
+        console.log('BaseApiService - Parsed JSON response:', data);
+      } catch (e) {
+        console.error('BaseApiService - Failed to parse JSON response:', e);
+        throw new Error('Invalid JSON response from server');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error(`BaseApiService - API Error (${url}):`, {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        cause: error.cause
+      });
+      throw error;
+    }
+  }
 }
 
 export default BaseApiService;

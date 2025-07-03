@@ -85,11 +85,49 @@ class ChatService extends BaseApiService {
    * Enviar mensaje con archivo
    */
   async sendFileMessage(chatId, file) {
+    console.log('chatService - sendFileMessage ENTRY:', { 
+      chatId, 
+      fileName: file.name, 
+      size: file.size, 
+      type: file.type,
+      lastModified: file.lastModified 
+    });
+    
+    if (!chatId) {
+      throw new Error('chatId is required for file upload');
+    }
+    
+    if (!file) {
+      throw new Error('file is required for file upload');
+    }
+    
     const formData = new FormData();
     formData.append('archivo', file);
     formData.append('idChat', chatId);
 
-    return this.postFormData(`/${chatId}/messages/file`, formData);
+    console.log('chatService - FormData created with entries:');
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes)` : value);
+    }
+    
+    const endpoint = `/${chatId}/messages/file`;
+    console.log('chatService - About to call postFormData with endpoint:', endpoint);
+    
+    try {
+      const response = await this.postFormData(endpoint, formData);
+      console.log('chatService - File upload successful response:', response);
+      return response;
+    } catch (error) {
+      console.error('chatService - File upload error:', error);
+      console.error('chatService - Error details:', {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+        response: error.response,
+        stack: error.stack
+      });
+      throw error;
+    }
   }
 
   /**

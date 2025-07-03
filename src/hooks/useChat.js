@@ -101,41 +101,82 @@ export const useChat = (chatId) => {
   
   // Enviar archivo
   const sendFile = async (file) => {
-    if (!chatId || !file) return null;
+    console.log('useChat - sendFile ENTRY:', { 
+      chatId, 
+      fileExists: !!file,
+      fileName: file?.name, 
+      fileSize: file?.size, 
+      fileType: file?.type 
+    });
+    
+    if (!chatId) {
+      console.error('useChat - sendFile: No chatId provided');
+      toast.error('ID de chat no válido');
+      return null;
+    }
+    
+    if (!file) {
+      console.error('useChat - sendFile: No file provided');
+      toast.error('No se seleccionó ningún archivo');
+      return null;
+    }
+    
+    console.log('useChat - sendFile: Starting validations...');
     
     // Validaciones
     if (!chatService.isValidFileType(file)) {
+      console.warn('useChat - File type not allowed:', file.type);
       toast.error('Tipo de archivo no permitido');
       return null;
     }
+    console.log('useChat - File type validation passed');
     
     if (!chatService.isValidFileSize(file)) {
+      console.warn('useChat - File size too large:', file.size);
       toast.error('El archivo excede el tamaño máximo permitido (10MB)');
       return null;
     }
-    
+    console.log('useChat - File size validation passed');
+
     try {
       setUploadingFile(true);
+      console.log('useChat - About to call chatService.sendFileMessage...');
       
       const response = await chatService.sendFileMessage(chatId, file);
+      console.log('useChat - chatService.sendFileMessage returned:', response);
+      
       const data = response.data || response;
+      console.log('useChat - Extracted data:', data);
       
       // Formatear URL del archivo
       const messageWithFormattedUrl = {
         ...data,
         rutaArchivo: chatService.formatFileUrl(data.rutaArchivo)
       };
+      console.log('useChat - Message with formatted URL:', messageWithFormattedUrl);
       
       // Actualizar mensajes locales
-      setMessages(prevMessages => [...prevMessages, messageWithFormattedUrl]);
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, messageWithFormattedUrl];
+        console.log('useChat - Updated messages array length:', newMessages.length);
+        return newMessages;
+      });
       
+      toast.success('Archivo enviado exitosamente');
       return messageWithFormattedUrl;
     } catch (err) {
-      console.error('Error sending file:', err);
-      toast.error('Error al enviar el archivo');
+      console.error('useChat - Error sending file:', err);
+      console.error('useChat - Error details:', {
+        message: err.message,
+        status: err.status,
+        response: err.response,
+        stack: err.stack
+      });
+      toast.error(`Error al enviar el archivo: ${err.message || 'Error desconocido'}`);
       return null;
     } finally {
       setUploadingFile(false);
+      console.log('useChat - sendFile completed, uploadingFile set to false');
     }
   };
   

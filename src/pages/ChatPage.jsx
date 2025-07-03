@@ -12,7 +12,7 @@ import WelcomeMessage from '../components/chat/WelcomeMessage';
 import ChatDebugger from '../components/debug/ChatDebugger';
 import { ROUTE_PATHS } from '../routes/routePaths';
 import ChatService from '../services/api/chatService';
-import { FiMessageCircle, FiUsers, FiMessageSquare, FiAlertTriangle } from 'react-icons/fi';
+import { FiMessageCircle, FiUsers, FiMessageSquare, FiAlertTriangle, FiFile, FiImage } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 /**
@@ -27,6 +27,7 @@ const ChatPage = () => {
   const [viewMode, setViewMode] = useState('chats'); // 'chats', 'contacts', 'conversation'
   const [creatingChat, setCreatingChat] = useState(false);
   const [showDebugger, setShowDebugger] = useState(false); // Estado para mostrar/ocultar depurador
+  const [hasNoChats, setHasNoChats] = useState(false); // Estado para controlar si hay chats disponibles
   const chatService = new ChatService();
   
   // Determinar si el usuario es psicólogo
@@ -140,72 +141,85 @@ const ChatPage = () => {
       loadMessages();
     }
   };
-  
-  // State para controlar si hay chats disponibles
-  const [hasNoChats, setHasNoChats] = useState(false);
-  
-  // Crear o obtener chat
-  const handleCreateOrGetChat = async (userId) => {
+
+  // Utility function to format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Utility function to get file icon based on file type
+  const getFileIcon = (mimeType) => {
+    if (!mimeType) return FiFile;
+    
+    if (mimeType.startsWith('image/')) {
+      return FiImage;
+    }
+    
+    // Add more file type mappings as needed
+    return FiFile;
+  };
+
+  // Handle message deletion
+  const handleDeleteMessage = async (messageId) => {
     try {
-      setCreatingChat(true);
-      const response = await createOrGetChat(userId);
-      const chatId = response.data?.id || response.id;
-      navigate(`${ROUTE_PATHS.CHAT}/${chatId}`);
-      setHasNoChats(false); // Ya tenemos al menos un chat
+      // This would typically call a service method to delete the message
+      // For now, just show a confirmation
+      if (window.confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+        // Implement delete logic here
+        toast.info('Funcionalidad de eliminación en desarrollo');
+      }
     } catch (error) {
-      console.error('Error creando o obteniendo el chat:', error);
-      toast.error('Error creando o obteniendo el chat');
-    } finally {
-      setCreatingChat(false);
+      console.error('Error deleting message:', error);
+      toast.error('Error al eliminar el mensaje');
     }
   };
-  
-  // Check if we should show the welcome message for a first-time user
-  useEffect(() => {
-    const checkChats = async () => {
-      try {
-        const response = await chatService.getUserChats();
-        const data = response.data || response;
-        setHasNoChats(data.length === 0);
-      } catch (error) {
-        console.error('Error checking chats:', error);
-        setHasNoChats(false);
-      }
-    };
-    
-    // Only check if we're in the chats view and not currently creating a chat
-    if (viewMode === 'chats' && !creatingChat) {
-      checkChats();
-    }
-  }, [viewMode, creatingChat, chatService]);
 
-  // Efecto para verificar si el usuario tiene chats
+  // Handle chat status change (only for psychologists)
+  const handleChangeStatus = async (newStatus) => {
+    try {
+      if (!selectedChatId) return;
+      
+      await chatService.updateChatStatus(selectedChatId, newStatus);
+      toast.success(`Chat ${newStatus === 'archivado' ? 'archivado' : 'activado'} correctamente`);
+      
+      // Reload chat info to reflect the change
+      // This would typically be handled by the useChat hook
+    } catch (error) {
+      console.error('Error changing chat status:', error);
+      toast.error('Error al cambiar el estado del chat');
+    }
+  };
+
+  // Handle welcome message contact click
+  const handleWelcomeContactClick = () => {
+    setViewMode('contacts');
+  };
+
+  // Effect to check if user has chats
   useEffect(() => {
     const checkUserChats = async () => {
       try {
         if (user?.id) {
-          console.log('Checking if user has chats...');
           const chatsResponse = await chatService.getUserChats();
           const userChats = chatsResponse.data || chatsResponse || [];
-          console.log('User chats:', userChats);
-          
-          // Actualizar el estado según si hay chats o no
           setHasNoChats(userChats.length === 0);
         }
       } catch (error) {
         console.error('Error checking user chats:', error);
-        // Si hay un error al cargar los chats, asumimos que no hay ninguno
         setHasNoChats(true);
       }
     };
-    
-    checkUserChats();
-  }, [user?.id, chatService]);
 
-  // Manejar clic en botón de contactos desde la pantalla de bienvenida
-  const handleWelcomeContactClick = () => {
-    handleToggleView('contacts');
-  };
+    if (user?.id) {
+      checkUserChats();
+    }
+  }, [user?.id]);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -327,6 +341,7 @@ const ChatPage = () => {
                 chatInfo={chatInfo}
                 isPsychologist={isPsychologist}
                 onBack={handleBackToList}
+                onChangeStatus={handleChangeStatus}
                 showBackButton={true}
               />
               
@@ -350,6 +365,10 @@ const ChatPage = () => {
                   <ChatMessageList 
                     messages={messages}
                     currentUserId={user?.id}
+                    onDeleteMessage={handleDeleteMessage}
+                    formatFileSize={formatFileSize}
+                    getFileIcon={getFileIcon}
+                    isLoading={loading}
                   />
                 )}
               </div>

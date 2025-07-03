@@ -6,7 +6,7 @@ const Header = () => {
   const { user, logout } = useAuth();
 
   // Debug temporal para ver la estructura del usuario
-  console.log('User object in Header:', user);
+  // User object available in Header
 
   const handleLogout = async () => {
     try {

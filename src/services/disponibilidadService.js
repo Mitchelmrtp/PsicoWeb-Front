@@ -38,7 +38,7 @@ class DisponibilidadService {
         body: JSON.stringify(disponibilidadData),
       });
       
-      console.log('Status de respuesta:', response.status);
+
       
       if (!response.ok) {
         const errorText = await response.text();

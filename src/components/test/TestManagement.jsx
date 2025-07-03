@@ -94,17 +94,17 @@ const TestManagement = () => {
         throw new Error(data.message || 'Error fetching test details');
       }
 
-      console.log('Test details received:', data);
+      // Processing test details
       
       // Extract data from the wrapped response if needed
       const testData = data.data || data;
-      console.log('Extracted test data:', testData);
+      // Extracting test data
       
       // Check for questions in either 'Preguntas' (uppercase) or 'preguntas' (lowercase)
       const questions = testData.Preguntas || testData.preguntas || [];
       
       if (Array.isArray(questions) && questions.length > 0) {
-        console.log('Questions found:', questions);
+        // Processing questions data
         
         const processedQuestions = questions.map(question => {
           let opciones = question.opciones;

@@ -50,7 +50,7 @@ const MisConsultas = () => {
         }
 
         const responseData = await response.json();
-        console.log('Appointment data from backend:', responseData);
+        // Processing appointment data from backend
         
         // Handle both array and { data: Array } response formats
         const appointments = Array.isArray(responseData) ? responseData : (responseData.data || []);

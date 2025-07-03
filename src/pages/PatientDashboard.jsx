@@ -18,7 +18,7 @@ const PatientDashboard = () => {
   const { psychologists, loading: psychologistsLoading } = usePsychologists();
 
   const handleViewAppointmentDetails = (appointment) => {
-    console.log('Ver detalles de cita:', appointment);
+    // Ver detalles de cita
     // Implementar navegación a detalles de cita
   };
 

@@ -164,7 +164,7 @@ export const CrearPruebas = () => {
         activa: true
       };
       
-      console.log('Sending test payload:', testPayload);
+      // Sending test payload to API
 
       const testResponse = await fetch(testUrl, {
         method: testMethod,
@@ -182,7 +182,7 @@ export const CrearPruebas = () => {
       }
 
       const testData = await testResponse.json();
-      console.log('Test creation response:', testData);
+      // Test creation successful
       
       // Extract the ID from the response structure
       const responseData = testData.data || testData;
@@ -193,7 +193,7 @@ export const CrearPruebas = () => {
         throw new Error('Could not retrieve test ID from response');
       }
       
-      console.log('Using test ID for questions:', savedTestId);
+      // Using saved test ID for questions
 
       // Now save all questions
       for (const pregunta of preguntas) {
@@ -208,7 +208,7 @@ export const CrearPruebas = () => {
 
         // Skip questions with empty content
         if (!pregunta.enunciado.trim()) {
-          console.log('Skipping empty question:', pregunta);
+          // Skipping empty question
           continue;
         }
         
@@ -224,7 +224,7 @@ export const CrearPruebas = () => {
         };
 
         try {
-          console.log(`Sending question to ${questionUrl}:`, questionPayload);
+          // Sending question to API
           
           const questionResponse = await fetch(questionUrl, {
             method: questionMethod,
@@ -242,7 +242,7 @@ export const CrearPruebas = () => {
           }
           
           const questionData = await questionResponse.json();
-          console.log('Question saved successfully:', questionData);
+          // Question saved successfully
         } catch (error) {
           console.error(`Error saving question "${pregunta.enunciado}":`, error);
           throw new Error(`Error saving question "${pregunta.enunciado}": ${error.message}`);

@@ -21,8 +21,7 @@ const PacientesPage = () => {
         setLoading(true);
         setError(null);
         
-        console.log('Fetching patients from:', ENDPOINTS.PSICOLOGO_PACIENTES);
-        console.log('Auth headers:', getAuthHeader());
+        // Fetching patients from API
         
         const response = await fetch(ENDPOINTS.PSICOLOGO_PACIENTES, {
           method: 'GET',
@@ -47,14 +46,14 @@ const PacientesPage = () => {
         }
         
         const data = await response.json();
-        console.log('Patient data from backend:', data);
+        // Processing patient data from backend
         
         // Handle the new Clean Architecture response structure
         const patientsArray = data.data || data;
         
         // Handle empty array case
         if (Array.isArray(patientsArray) && patientsArray.length === 0) {
-          console.log('No patients found for this psychologist');
+          // No patients found for this psychologist
         }
         
         // Process patient data

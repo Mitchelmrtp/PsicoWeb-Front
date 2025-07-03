@@ -36,7 +36,7 @@ const ReservaCita = () => {
       }
 
       const data = await response.json();
-      console.log('Raw psychologist data from API:', data);
+      // Processing psychologist data from API
       
       // Handle the new Clean Architecture response structure
       const psicologosArray = data.data || data;
@@ -86,7 +86,7 @@ const ReservaCita = () => {
       setLoading(true);
       
       // Log the exact data being sent
-      console.log("Sending to API:", sessionData);
+      // Sending session data to API
       
       const response = await fetch(ENDPOINTS.SESIONES, {
         method: 'POST',
@@ -180,7 +180,7 @@ const ReservaCita = () => {
       };
 
       // Debug: Log the session data being sent
-      console.log('Session data being sent:', sessionData);
+      // Session data being sent
 
       // Send to backend
       await createSesion(sessionData);

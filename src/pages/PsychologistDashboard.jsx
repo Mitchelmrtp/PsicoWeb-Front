@@ -53,7 +53,7 @@ const PsychologistDashboard = () => {
             <select 
               className="border border-gray-300 rounded-md px-3 py-2 bg-white"
               defaultValue={new Date().getMonth()}
-              onChange={(e) => console.log('Mes seleccionado:', e.target.value)}
+              onChange={(e) => {/* Month selector */}}
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i} value={i}>

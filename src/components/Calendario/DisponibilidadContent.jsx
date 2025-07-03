@@ -4,7 +4,6 @@ import { es } from 'date-fns/locale'
 import MyCalendar from './Calendar2'
 import disponibilidadService from '../../services/disponibilidadService'
 import { toast } from 'react-toastify'
-import NavigationSidebar from '../layout/NavigationSidebar'
 
 // Componente personalizado para eventos en el calendario
 const CustomEvent = ({ event }) => {
@@ -174,29 +173,21 @@ const Disponibilidad = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <NavigationSidebar />
-      
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 bg-gray-50 min-h-screen">
+      <div className="p-6">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div>
-            <h1 className="text-lg font-medium text-gray-600">Configuración</h1>
-            <h2 className="text-2xl font-bold">Mi Disponibilidad</h2>
-          </div>
+        <header className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Mi Disponibilidad</h1>
+          <p className="text-gray-600 mt-2">Gestiona tus horarios de atención</p>
         </header>
         
-        <div className="p-6">
-          <div className="flex gap-6">
-            {/* Contenido principal */}
-            <div className="flex-1">
-            {/* Formulario para agregar/editar disponibilidad */}
-            <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">
-                {editingId ? 'Editar Disponibilidad' : 'Agregar Nueva Disponibilidad'}
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Formulario para agregar/editar disponibilidad */}
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">
+            {editingId ? 'Editar Disponibilidad' : 'Agregar Nueva Disponibilidad'}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Selección de día */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -351,50 +342,6 @@ const Disponibilidad = () => {
               </p>
             </div>
           )}
-        </div>
-            </div>
-
-            {/* Sidebar derecho - Disponibilidad del día actual */}
-            <div className="w-80">
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">
-                Disponibilidad de Hoy
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                {format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
-              </p>
-              
-              {(() => {
-                const today = format(new Date(), 'eeee', { locale: es }).toUpperCase();
-                const normalizedToday = today === 'MIÉRCOLES' ? 'MIERCOLES' : 
-                                       today === 'SÁBADO' ? 'SABADO' : today;
-                const todayDisponibilidades = disponibilidades.filter(disp => 
-                  disp.diaSemana === normalizedToday && disp.activo
-                );
-                
-                return todayDisponibilidades.length > 0 ? (
-                  <div className="space-y-3">
-                    {todayDisponibilidades.map(disp => (
-                      <div key={disp.id} className="border-l-4 border-indigo-800 pl-4 py-2">
-                        <p className="font-medium text-gray-800">
-                          {disp.horaInicio.substring(0, 5)} - {disp.horaFin.substring(0, 5)}
-                        </p>
-                        <p className="text-sm text-green-600">Disponible</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p className="text-gray-600 text-sm">No hay disponibilidad configurada para hoy</p>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
         </div>
       </div>
     </div>

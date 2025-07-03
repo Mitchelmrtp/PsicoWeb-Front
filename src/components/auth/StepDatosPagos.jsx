@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../common/Button";
+import Button from "../ui/Button";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

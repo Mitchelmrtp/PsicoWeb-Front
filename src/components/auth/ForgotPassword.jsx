@@ -1,7 +1,7 @@
 // src/components/auth/ForgotPassword.jsx
 import { useState } from "react";
-import Input from "../common/Input";
-import Button from "../common/Button";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 import FormError from "../common/FormError";
 import { authService } from "../../services/api";
 import { Link } from "react-router-dom";

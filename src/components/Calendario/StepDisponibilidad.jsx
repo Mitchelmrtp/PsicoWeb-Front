@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MyCalendar from "./Calendar";
-import Button from "../common/Button";
+import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { ENDPOINTS, getAuthHeader } from "../../config/api";
 import { addDays, format, parseISO, startOfWeek, endOfWeek } from "date-fns";

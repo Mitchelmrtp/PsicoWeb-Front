@@ -24,6 +24,8 @@ export const ENDPOINTS = {
   RESULTADOS: `${API_URL}/pruebas/resultados`,
   // Endpoint para disponibilidad
   DISPONIBILIDAD: `${API_URL}/disponibilidad`,
+  // Endpoint para el chat
+  CHAT: `${API_URL}/chat`,
 };
 
 export const getAuthHeader = () => {

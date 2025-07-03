@@ -73,14 +73,33 @@ class AuthService extends BaseApiService {
   getStoredUser() {
     try {
       const userStr = localStorage.getItem('user');
-      return userStr ? JSON.parse(userStr) : null;
-    } catch {
+      if (!userStr) return null;
+      
+      const user = JSON.parse(userStr);
+      
+      // Normalizar el campo de rol para asegurar consistencia
+      if (user && (user.rol || user.role)) {
+        user.rol = user.rol || user.role;
+        user.role = user.rol || user.role;
+      }
+      
+      console.log('authService - Usuario almacenado recuperado:', user);
+      return user;
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
       return null;
     }
   }
 
   setStoredUser(user) {
     if (user) {
+      // Normalizar el campo de rol para asegurar consistencia
+      if (user.rol || user.role) {
+        user.rol = user.rol || user.role;
+        user.role = user.rol || user.role;
+      }
+      
+      console.log('authService - Guardando usuario normalizado:', user);
       localStorage.setItem('user', JSON.stringify(user));
     } else {
       localStorage.removeItem('user');

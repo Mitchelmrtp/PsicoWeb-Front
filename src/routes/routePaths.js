@@ -28,6 +28,10 @@ export const ROUTE_PATHS = {
   RESULTADO: "/resultado/:resultId",
   RESULTADO_PLURAL: "/resultados/:resultId",  // Added for compatibility with existing code
   
+  // Chat
+  CHAT: "/chat",
+  CHAT_DETAIL: "/chat/:id",
+  
   // Perfiles
   PERFIL_PACIENTE: "/perfil-paciente",
   PERFIL_PACIENTE_ALT: "/perfil_paciente",
@@ -62,6 +66,7 @@ export const NAVIGATION_ROUTES = {
     { path: ROUTE_PATHS.RESERVA, label: "Reservar Cita", icon: "calendar" },
     { path: ROUTE_PATHS.TEST_MENU, label: "Pruebas", icon: "test" },
     { path: ROUTE_PATHS.CONSULTAS, label: "Mis Consultas", icon: "consultation" },
+    { path: ROUTE_PATHS.CHAT, label: "Mensajes", icon: "chat" },
     { path: ROUTE_PATHS.PERFIL_PACIENTE, label: "Perfil", icon: "profile" },
     { path: ROUTE_PATHS.HELP, label: "Ayuda", icon: "help" },
   ],
@@ -70,6 +75,7 @@ export const NAVIGATION_ROUTES = {
     { path: ROUTE_PATHS.PACIENTES, label: "Pacientes", icon: "patients" },
     { path: ROUTE_PATHS.DISPONIBILIDAD, label: "Mi disponibilidad", icon: "availability" },
     { path: ROUTE_PATHS.CONSULTAS, label: "Mis consultas", icon: "consultation" },
+    { path: ROUTE_PATHS.CHAT, label: "Mensajes", icon: "chat" },
     { path: ROUTE_PATHS.CONSULTAS_ONLINE, label: "Consultas Online", icon: "online" },
     { path: ROUTE_PATHS.TEST_MENU, label: "Gestión de Pruebas", icon: "test" },
     { path: ROUTE_PATHS.PERFIL_PSICOLOGO, label: "Perfil", icon: "profile" },

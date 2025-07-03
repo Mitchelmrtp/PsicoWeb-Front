@@ -7,6 +7,7 @@ import PsychologistCard from '../components/features/PsychologistCard';
 import { Card, Button } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../routes/routePaths';
+import { FiMessageCircle } from 'react-icons/fi';
 
 // Dashboard del paciente refactorizado siguiendo principios SOLID
 const PatientDashboard = () => {
@@ -106,6 +107,33 @@ const PatientDashboard = () => {
                   ))}
                 </div>
               )}
+            </Card.Content>
+          </Card>
+
+          {/* Sección de chat */}
+          <Card>
+            <Card.Header>
+              <Card.Title>Mensajes</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="bg-blue-100 p-3 rounded-full mr-4">
+                    <FiMessageCircle size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Mensajes con tu psicólogo</h4>
+                    <p className="text-gray-500 text-sm">Comunícate directamente con tu profesional</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate(ROUTE_PATHS.CHAT)}
+                  variant="primary"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Ver mensajes
+                </Button>
+              </div>
             </Card.Content>
           </Card>
         </main>

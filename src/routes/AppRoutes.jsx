@@ -23,6 +23,7 @@ const PerfilPaciente = lazy(() => import("../components/auth/PerfilPaciente.jsx"
 const MisConsultas = lazy(() => import("../pages/MisConsultas"));
 const PacientesPage = lazy(() => import("../pages/PacientesPage"));
 const TestManagement = lazy(() => import("../components/test/TestManagement"));
+const ChatPage = lazy(() => import("../pages/ChatPage"));
 // Nuevos componentes refactorizados con Container/Presenter pattern
 const PatientTestViewContainer = lazy(() => import("../components/test/PatientTestViewContainer"));
 const TestPageContainer = lazy(() => import("../components/test/TestPageContainer"));
@@ -117,6 +118,28 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Disponibilidad />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de chat */}
+        <Route
+          path={ROUTE_PATHS.CHAT}
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingSpinner />}>
+                <ChatPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.CHAT_DETAIL}
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingSpinner />}>
+                <ChatPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />

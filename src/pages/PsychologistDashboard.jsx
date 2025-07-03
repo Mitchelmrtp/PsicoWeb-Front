@@ -7,6 +7,7 @@ import AppointmentList from '../components/features/AppointmentList';
 import { Card, Button } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../routes/routePaths';
+import { FiMessageCircle } from 'react-icons/fi';
 
 // Dashboard del psicólogo refactorizado
 const PsychologistDashboard = () => {
@@ -186,6 +187,33 @@ const PsychologistDashboard = () => {
                   ))}
                 </div>
               )}
+            </Card.Content>
+          </Card>
+          
+          {/* Sección de chat */}
+          <Card>
+            <Card.Header>
+              <Card.Title>Comunicación con Pacientes</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="bg-indigo-100 p-3 rounded-full mr-4">
+                    <FiMessageCircle size={24} className="text-indigo-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Mensajes de pacientes</h4>
+                    <p className="text-gray-500 text-sm">Mantén comunicación constante con tus pacientes</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate(ROUTE_PATHS.CHAT)}
+                  variant="primary"
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Ver mensajes
+                </Button>
+              </div>
             </Card.Content>
           </Card>
         </main>

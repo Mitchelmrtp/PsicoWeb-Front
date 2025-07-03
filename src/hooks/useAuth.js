@@ -24,11 +24,19 @@ export const useAuth = () => {
   const normalizedUser = useMemo(() => {
     if (!authStore.user) return null;
     
-    return {
+    // Normalizar campos críticos
+    const user = {
       ...authStore.user,
       userId: authStore.user.id || authStore.user.userId,
+      id: authStore.user.id || authStore.user.userId,
+      // Normalizar el campo de rol
+      rol: authStore.user.rol || authStore.user.role,
+      role: authStore.user.rol || authStore.user.role
     };
-  }, [authStore.user?.id, authStore.user?.role, authStore.user?.email]);
+    
+    console.log('useAuth - Usuario normalizado:', user);
+    return user;
+  }, [authStore.user?.id, authStore.user?.role, authStore.user?.rol, authStore.user?.email]);
 
   return {
     ...authStore,

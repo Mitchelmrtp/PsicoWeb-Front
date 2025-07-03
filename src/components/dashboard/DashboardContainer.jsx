@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import PsicologoDashboard from '../../pages/PsicologoDashboard';
-import PacienteDashboard from '../../pages/PacienteDashboard';
+import PsychologistDashboard from '../../pages/PsychologistDashboard';
+import PatientDashboard from '../../pages/PatientDashboard';
+import { LoadingSpinner } from '../ui';
 
 const DashboardContainer = () => {
   const { user, isAuthenticated } = useAuth();
@@ -14,23 +15,31 @@ const DashboardContainer = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  if (!user) return null;
+  if (!user) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   // Render appropriate dashboard based on user role
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {user.role === 'psicologo' ? (
-        <PsicologoDashboard />
-      ) : user.role === 'paciente' ? (
-        <PacienteDashboard />
-      ) : (
-        <div className="p-8 text-center">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="mt-4">Rol no reconocido: {user.role}</p>
+  switch (user.role) {
+    case 'psicologo':
+      return <PsychologistDashboard />;
+    case 'paciente':
+      return <PatientDashboard />;
+    default:
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="p-8 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard</h1>
+            <p className="text-gray-600">
+              Rol no reconocido: {user.role}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Por favor, contacte al administrador del sistema.
+            </p>
+          </div>
         </div>
-      )}
-    </div>
-  );
+      );
+  }
 };
 
 export default DashboardContainer;

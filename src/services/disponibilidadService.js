@@ -27,18 +27,31 @@ class DisponibilidadService {
 
   async createDisponibilidad(disponibilidadData) {
     try {
+      const authHeader = getAuthHeader();
+      
       const response = await fetch(ENDPOINTS.DISPONIBILIDAD, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeader(),
+          ...authHeader,
         },
         body: JSON.stringify(disponibilidadData),
       });
       
+      console.log('Status de respuesta:', response.status);
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(getErrorMessage(error) || 'Error al crear disponibilidad');
+        const errorText = await response.text();
+        console.error('Texto completo de error:', errorText);
+        
+        let errorObj;
+        try {
+          errorObj = JSON.parse(errorText);
+        } catch (e) {
+          errorObj = { message: errorText || 'Error desconocido del servidor' };
+        }
+        
+        throw new Error(getErrorMessage(errorObj) || `Error ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
@@ -112,7 +125,17 @@ class DisponibilidadService {
       }
       
       const data = await response.json();
-      return handleApiResponse(data);
+      const processedData = handleApiResponse(data);
+      
+      // Ensure we always return an array
+      if (Array.isArray(processedData)) {
+        return processedData;
+      } else if (processedData && Array.isArray(processedData.data)) {
+        return processedData.data;
+      } else {
+        console.warn('Unexpected response format from disponibilidad API:', processedData);
+        return [];
+      }
     } catch (error) {
       console.error('Error obteniendo disponibilidad del psicólogo:', error);
       throw error;

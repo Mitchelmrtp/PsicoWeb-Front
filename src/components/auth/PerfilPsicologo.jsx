@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { ENDPOINTS, getAuthHeader } from '../../config/api';
 import SidebarManager from '../dashboard/SidebarManager';
@@ -17,9 +17,11 @@ const PerfilPsicologo = () => {
     anosExperiencia: '',
     tarifaPorSesion: ''
   });
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const fetchAttemptedRef = useRef(false);
 
   useEffect(() => {
-    const fetchPsicologo = async () => {
+    const fetchPsicologo = async (retryCount = 0, maxRetries = 2) => {
       if (!user || !user.id) {
         setError('Usuario no autenticado');
         setLoading(false);
@@ -28,20 +30,47 @@ const PerfilPsicologo = () => {
 
       try {
         setLoading(true);
+        setError(null); // Limpiar errores anteriores
+        
+        // Create fetch request with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout
+        
+        console.log(`Intentando obtener datos del psicólogo con ID: ${user.id}`);
+        
         const response = await fetch(`${ENDPOINTS.PSICOLOGOS}/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
           },
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-          throw new Error('Error al cargar los datos del psicólogo');
+          if (response.status === 403) {
+            throw new Error('No tienes permiso para acceder a este perfil');
+          } else if (response.status === 404) {
+            throw new Error('Perfil de psicólogo no encontrado');
+          } else if (response.status === 503 && retryCount < maxRetries) {
+            console.log(`Error de recursos, reintentando en ${(retryCount + 1) * 2} segundos... (${retryCount + 1}/${maxRetries})`);
+            setTimeout(() => fetchPsicologo(retryCount + 1, maxRetries), (retryCount + 1) * 2000);
+            return;
+          } else {
+            throw new Error(`Error al cargar los datos del psicólogo: ${response.status}`);
+          }
         }
 
         const data = await response.json();
+        console.log('Datos del psicólogo recibidos:', data);
+        
         const psicologoData = data.data || data;
+        if (!psicologoData || Object.keys(psicologoData).length === 0) {
+          throw new Error('No se recibieron datos del psicólogo');
+        }
+        
         setPsicologo(psicologoData);
         
         // Inicializar form data con los datos existentes
@@ -54,14 +83,52 @@ const PerfilPsicologo = () => {
           tarifaPorSesion: psicologoData.tarifaPorSesion || ''
         });
       } catch (err) {
-        setError(err.message);
+        console.error('Error en fetchPsicologo:', err);
+        
+        if (err.name === 'AbortError') {
+          setError('La petición ha tardado demasiado. Por favor, inténtelo de nuevo más tarde.');
+        } else if ((err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) && retryCount < maxRetries) {
+          console.log(`Error de red, reintentando en ${(retryCount + 1) * 2} segundos... (${retryCount + 1}/${maxRetries})`);
+          setTimeout(() => fetchPsicologo(retryCount + 1, maxRetries), (retryCount + 1) * 2000);
+          return;
+        } else {
+          setError(err.message || 'Error desconocido al cargar los datos del psicólogo');
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPsicologo();
-  }, [user]);
+    // Usar una referencia para asegurarnos de que solo se ejecute una vez
+    // y evitar ciclos infinitos
+    const userId = user?.id;
+    
+    if (userId && !psicologo && !error && !fetchAttemptedRef.current) {
+      fetchAttemptedRef.current = true; // Marcar que ya intentamos obtener datos
+      fetchPsicologo();
+    } else if (!userId) {
+      setLoading(false);
+      setError('Usuario no autenticado');
+    }
+    
+    // Dependencia explícita en el ID del usuario, no en todo el objeto user
+    // y solo se ejecuta una vez por cambio de ID
+    return () => {
+      // Si el ID cambia, reiniciamos el flag para permitir un nuevo fetch
+      if (userId !== user?.id) {
+        fetchAttemptedRef.current = false;
+      }
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (psicologo && user && !dataLoaded) {
+      // Verificamos que tenemos datos tanto del usuario como del psicólogo
+      // y solo actualizamos dataLoaded una vez para evitar re-renders
+      setDataLoaded(true);
+      console.log('Datos completos cargados:', { user, psicologo });
+    }
+  }, [psicologo, user, dataLoaded]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,7 +165,10 @@ const PerfilPsicologo = () => {
     <div className="flex h-screen">
       <SidebarManager />
       <div className="flex-1 flex items-center justify-center">
-        <p>Cargando perfil...</p>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 mb-4"></div>
+          <p>Cargando perfil de psicólogo...</p>
+        </div>
       </div>
     </div>
   );
@@ -106,8 +176,34 @@ const PerfilPsicologo = () => {
   if (error) return (
     <div className="flex h-screen">
       <SidebarManager />
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-red-600">Error: {error}</p>
+      <div className="flex-1 flex items-center justify-center flex-col p-6">
+        <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <div className="space-y-4 mt-6">
+            <p className="text-gray-600">
+              {error.includes('no encontrado') && 'Parece que tu perfil de psicólogo no existe. ¿Quieres crearlo?'}
+              {error.includes('permiso') && 'No tienes permiso para acceder a este perfil. Verifica tu inicio de sesión.'}
+              {error.includes('timed out') && 'El servidor tardó demasiado en responder. Por favor, intenta de nuevo más tarde.'}
+              {error.includes('network') && 'Hay problemas de conexión. Verifica tu conexión a internet.'}
+            </p>
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+              >
+                Reintentar
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+              >
+                Volver
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

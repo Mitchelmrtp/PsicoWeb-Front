@@ -49,11 +49,14 @@ const MisConsultas = () => {
           throw new Error('Error al cargar las citas');
         }
 
-        const data = await response.json();
-        console.log('Appointment data from backend:', data);
+        const responseData = await response.json();
+        console.log('Appointment data from backend:', responseData);
+        
+        // Handle both array and { data: Array } response formats
+        const appointments = Array.isArray(responseData) ? responseData : (responseData.data || []);
         
         // Map backend data to the format expected by our UI
-        const formattedAppointments = data
+        const formattedAppointments = appointments
           .filter(appointment => {
             // Filtrar según rol del usuario
             if (user.role === 'psicologo') {

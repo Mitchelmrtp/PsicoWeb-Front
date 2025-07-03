@@ -34,8 +34,10 @@ const PatientTestView = () => {
           throw new Error('Error fetching tests');
         }
 
-        const data = await response.json();
-        setTests(data.filter(test => test.activa));
+        const responseData = await response.json();
+        // Handle both array and { data: Array } response formats
+        const testsData = Array.isArray(responseData) ? responseData : (responseData.data || []);
+        setTests(testsData.filter(test => test.activa));
       } catch (err) {
         console.error('Error loading tests:', err);
         setError('Error al cargar las pruebas disponibles');
@@ -48,36 +50,44 @@ const PatientTestView = () => {
     const fetchResults = async () => {
       try {
         setLoadingResults(true);
-        console.log('Fetching results for patient ID:', user?.id || user?.userId);
+        // Check if user ID exists before attempting to fetch
+        const patientId = user?.id || user?.userId;
         
-        // Changed API endpoint structure to match backend route structure
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
+        if (!patientId) {
+          console.warn('No patient ID available, skipping results fetch');
+          setLoadingResults(false);
+          return;
+        }
         
-        // Use the correct endpoint - "pruebas" is missing in your current URL
-        const url = `${API_URL}/pruebas/resultados?pacienteId=${user?.id || user?.userId}`;
-        
-        console.log('Fetching from URL:', url);
-        
-        const response = await fetch(url, {
+        const response = await fetch(`${ENDPOINTS.RESULTADOS}?pacienteId=${patientId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
           },
         });
-        
-        // Rest of your function remains the same
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error Response:', response.status, errorText);
-          throw new Error(`Error fetching test results: ${response.status}`);
+          throw new Error(`Error al cargar los resultados: ${response.status}`);
         }
 
-        const data = await response.json();
-        console.log('Results received:', data);
-        setResults(data);
+        const responseData = await response.json();
+        console.log('Results data:', responseData);
+        
+        // Manejar tanto respuestas directas como envueltas
+        const resultsData = Array.isArray(responseData) ? responseData : (responseData.data || []);
+        
+        // Ordenar resultados por fecha, más recientes primero
+        const sortedResults = resultsData.sort((a, b) => 
+          new Date(b.fechaRealizacion) - new Date(a.fechaRealizacion)
+        );
+        
+        setResults(sortedResults);
       } catch (err) {
         console.error('Error loading test results:', err);
+        toast.error('Error al cargar los resultados');
         setError('Error al cargar resultados de pruebas');
       } finally {
         setLoadingResults(false);
@@ -86,7 +96,7 @@ const PatientTestView = () => {
 
     fetchTests();
     fetchResults();
-  }, [user.userId]);
+  }, [user?.id, user?.userId]);
 
   useEffect(() => {
     if (results?.length > 0) {
@@ -99,7 +109,7 @@ const PatientTestView = () => {
   };
 
   const handleViewResult = (resultId) => {
-    navigate(`/resultado/${resultId}`);
+    navigate(`/resultados/${resultId}`);
   };
 
   const handleToggleDetails = async (testId) => {
@@ -270,16 +280,16 @@ const PatientTestView = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Prueba
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Fecha
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Resultado
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
@@ -289,7 +299,7 @@ const PatientTestView = () => {
                       <tr key={result.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {result.Prueba?.titulo || "Prueba desconocida"}
+                            {result.Prueba?.titulo || result.prueba?.titulo || "Prueba sin título"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -297,9 +307,26 @@ const PatientTestView = () => {
                             {new Date(result.fechaRealizacion).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 max-w-xs truncate">
-                            {result.interpretacion || result.resultado?.substring(0, 50) || "No disponible"}
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">
+                            <div className="flex items-center">
+                              <div className="w-24 h-2 bg-gray-200 rounded-full mr-2">
+                                <div
+                                  className={`h-2 rounded-full ${
+                                    result.puntuacionPromedio >= 4 ? 'bg-red-500' :
+                                    result.puntuacionPromedio >= 3 ? 'bg-yellow-500' :
+                                    result.puntuacionPromedio >= 2 ? 'bg-blue-500' : 'bg-green-500'
+                                  }`}
+                                  style={{ width: `${(result.puntuacionPromedio / 5) * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm">
+                                {result.puntuacionPromedio ? `${result.puntuacionPromedio.toFixed(1)}/5` : 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {result.interpretacion || 'Sin interpretación'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

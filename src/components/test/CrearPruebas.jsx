@@ -37,15 +37,28 @@ export const CrearPruebas = () => {
           }
 
           const data = await response.json();
-          setNombreTest(data.titulo);
-          setDescripcion(data.descripcion || '');
+          const testData = data.data || data;
+          
+          // Handle different field names between backend and frontend
+          setNombreTest(testData.titulo || testData.nombre || '');
+          setDescripcion(testData.descripcion || '');
+          if (testData.tiempoDuracion) {
+            setDuracion(testData.tiempoDuracion.toString());
+          }
           
           // If the test has questions, load them
-          if (data.Preguntas && data.Preguntas.length > 0) {
-            setPreguntas(data.Preguntas.map(q => ({
+          if (testData.preguntas && testData.preguntas.length > 0) {
+            setPreguntas(testData.preguntas.map(q => ({
               id: q.id,
-              enunciado: q.enunciado,
-              opciones: Array.isArray(q.opciones) ? q.opciones : [],
+              enunciado: q.texto || q.enunciado || '',
+              opciones: Array.isArray(q.opciones) ? q.opciones : [''],
+              pesoEvaluativo: q.pesoEvaluativo || 1
+            })));
+          } else if (testData.Preguntas && testData.Preguntas.length > 0) {
+            setPreguntas(testData.Preguntas.map(q => ({
+              id: q.id,
+              enunciado: q.texto || q.enunciado || '',
+              opciones: Array.isArray(q.opciones) ? q.opciones : [''],
               pesoEvaluativo: q.pesoEvaluativo || 1
             })));
           }
@@ -120,14 +133,20 @@ export const CrearPruebas = () => {
       return;
     }
 
-    // Validate questions
-    const invalidQuestions = preguntas.filter(
-      (p) => !p.enunciado.trim() || p.opciones.some((o) => !o.trim())
+    // Filter out invalid questions
+    const validQuestions = preguntas.filter(
+      (p) => p.enunciado.trim() && !p.opciones.every(o => !o.trim())
     );
 
-    if (invalidQuestions.length > 0) {
-      toast.error("Todas las preguntas y opciones deben tener contenido");
+    if (validQuestions.length === 0) {
+      toast.error("Debe incluir al menos una pregunta con contenido y opciones");
       return;
+    }
+    
+    // Display warning about invalid questions being skipped
+    const invalidCount = preguntas.length - validQuestions.length;
+    if (invalidCount > 0) {
+      toast.warning(`Se omitirán ${invalidCount} pregunta(s) sin contenido o sin opciones`);
     }
 
     try {
@@ -140,10 +159,12 @@ export const CrearPruebas = () => {
         : ENDPOINTS.PRUEBAS;
       
       const testPayload = {
-        titulo: nombreTest,
+        titulo: nombreTest, // Using 'titulo' to match backend model
         descripcion: descripcion,
         activa: true
       };
+      
+      console.log('Sending test payload:', testPayload);
 
       const testResponse = await fetch(testUrl, {
         method: testMethod,
@@ -155,11 +176,24 @@ export const CrearPruebas = () => {
       });
 
       if (!testResponse.ok) {
-        throw new Error('Error saving test');
+        const errorData = await testResponse.json().catch(() => ({}));
+        console.error('Test save error details:', errorData);
+        throw new Error(`Error saving test: ${errorData.message || testResponse.status}`);
       }
 
       const testData = await testResponse.json();
-      const savedTestId = testData.id || testId;
+      console.log('Test creation response:', testData);
+      
+      // Extract the ID from the response structure
+      const responseData = testData.data || testData;
+      const savedTestId = responseData.id || testId;
+      
+      if (!savedTestId) {
+        console.error('Failed to get test ID from response:', testData);
+        throw new Error('Could not retrieve test ID from response');
+      }
+      
+      console.log('Using test ID for questions:', savedTestId);
 
       // Now save all questions
       for (const pregunta of preguntas) {
@@ -172,23 +206,46 @@ export const CrearPruebas = () => {
           questionUrl = `${ENDPOINTS.PRUEBAS}/${savedTestId}/preguntas/${pregunta.id}`;
         }
 
+        // Skip questions with empty content
+        if (!pregunta.enunciado.trim()) {
+          console.log('Skipping empty question:', pregunta);
+          continue;
+        }
+        
+        // Ensure there's at least one option and all options have content
+        const validOptions = pregunta.opciones.filter(opt => opt.trim() !== '');
+        if (validOptions.length === 0) {
+          validOptions.push('Opción 1'); // Add a default option if none exist
+        }
+        
         const questionPayload = {
           enunciado: pregunta.enunciado,
-          opciones: pregunta.opciones,
-          pesoEvaluativo: pregunta.pesoEvaluativo
+          opciones: validOptions
         };
 
-        const questionResponse = await fetch(questionUrl, {
-          method: questionMethod,
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-          },
-          body: JSON.stringify(questionPayload),
-        });
+        try {
+          console.log(`Sending question to ${questionUrl}:`, questionPayload);
+          
+          const questionResponse = await fetch(questionUrl, {
+            method: questionMethod,
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeader(),
+            },
+            body: JSON.stringify(questionPayload),
+          });
 
-        if (!questionResponse.ok) {
-          throw new Error(`Error saving question: ${pregunta.enunciado}`);
+          if (!questionResponse.ok) {
+            const errorData = await questionResponse.json().catch(() => ({}));
+            console.error('Question save error details:', errorData);
+            throw new Error(`${errorData.message || questionResponse.status}`);
+          }
+          
+          const questionData = await questionResponse.json();
+          console.log('Question saved successfully:', questionData);
+        } catch (error) {
+          console.error(`Error saving question "${pregunta.enunciado}":`, error);
+          throw new Error(`Error saving question "${pregunta.enunciado}": ${error.message}`);
         }
       }
 
@@ -197,7 +254,16 @@ export const CrearPruebas = () => {
       
     } catch (err) {
       console.error('Error saving test:', err);
-      toast.error('Error al guardar la prueba');
+      toast.error(`Error al guardar la prueba: ${err.message || 'Error desconocido'}`);
+      // Display more detailed error in console
+      if (err.response) {
+        try {
+          const errorData = await err.response.json();
+          console.error('Server error details:', errorData);
+        } catch (e) {
+          console.error('Could not parse error response');
+        }
+      }
     } finally {
       setSubmitting(false);
     }

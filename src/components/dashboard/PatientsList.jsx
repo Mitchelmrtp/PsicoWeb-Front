@@ -43,7 +43,7 @@ const PatientsList = ({ patients, loading, error }) => {
           <div 
             key={patient.id} 
             className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-            onClick={() => navigate(`/perfil_paciente/${patient.id}`)}  // Update this path as needed
+            onClick={() => navigate(`/pacientes/${patient.id}`)}  // Ruta actualizada
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center">

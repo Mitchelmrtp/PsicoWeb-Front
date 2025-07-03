@@ -1,65 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Header } from '../components/layout';
-
+import { usePsychologists } from '../hooks/usePsychologists';
 
 const MainPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
-  const [psychologists, setPsychologists] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
   
-  useEffect(() => {
-    const fetchPsychologists = async () => {
-      try {
-        
-        const mockData = [
-          {
-            id: 1,
-            name: 'Amanda Clara',
-            specialty: 'Psicología Infantil',
-            experience: '12 años de experiencia',
-            availability: { days: ['Mar', 'Jue'], hours: '10:00 AM-01:00 PM' },
-            price: '$25',
-            imageUrl: '/assets/psychologist1.jpg',
-            tag: 'Psicología Infantil'
-          },
-          {
-            id: 2,
-            name: 'Jason Shatsky',
-            specialty: 'Psicología Clínica',
-            experience: '7 años de experiencia',
-            availability: { days: ['Miér', 'Jue'], hours: '10:00 AM-01:00 PM' },
-            price: '$35',
-            imageUrl: '/assets/psychologist2.jpg',
-            tag: 'Psicología Clínica'
-          },
-          {
-            id: 3,
-            name: 'Jessie Dux',
-            specialty: 'Psicólogo educativo',
-            experience: '5 años de experiencia',
-            availability: { days: ['Sáb', 'Dom'], hours: '10:00 AM-01:00 PM' },
-            price: '$15',
-            imageUrl: '/assets/psychologist3.jpg',
-            tag: 'Psicólogo educativo'
-          }
-        ];
-        
-        setPsychologists(mockData);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching psychologists:', error);
-        setLoading(false);
-      }
-    };
-    
-    fetchPsychologists();
-  }, []);
+  // Usar el hook de psicólogos que se conecta al backend
+  const { psychologists, loading } = usePsychologists();
 
   const handleSearch = (e) => {
     e.preventDefault();

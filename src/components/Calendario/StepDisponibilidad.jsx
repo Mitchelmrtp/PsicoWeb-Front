@@ -37,9 +37,7 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
   
   // Generate calendar events from availability data
   useEffect(() => {
-    if (disponibilidades.length > 0) {
-      generateCalendarEvents();
-    }
+    generateCalendarEvents();
   }, [disponibilidades, existingAppointments]);
   
   // When a date is selected, calculate available times for that day
@@ -73,9 +71,12 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
       }
 
       const data = await response.json();
-      setExistingAppointments(data);
+      // Handle response that might be in { data: [...] } format or direct array
+      const appointments = data.data ? data.data : (Array.isArray(data) ? data : []);
+      setExistingAppointments(appointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setExistingAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -105,9 +106,16 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
   
   // Generate calendar events from the psychologist's availability schedule
   const generateCalendarEvents = () => {
+    if (!Array.isArray(disponibilidades) || disponibilidades.length === 0) {
+      return;
+    }
+
     const events = [];
     const today = new Date();
     const startWeek = startOfWeek(today);
+    
+    // Ensure existingAppointments is an array
+    const appointments = Array.isArray(existingAppointments) ? existingAppointments : [];
     
     // Convert day names from Spanish to their numeric values
     const dayNameToNumber = {
@@ -142,7 +150,7 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
         end.setHours(endHour, endMinute, 0);
         
         // Check if this time slot conflicts with any existing appointment
-        const isBooked = existingAppointments.some(appt => {
+        const isBooked = appointments.some(appt => {
           const apptDate = new Date(appt.fecha);
           const sameDay = 
             apptDate.getDate() === slotDate.getDate() && 
@@ -198,7 +206,9 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
       const diaSemana = dayNames[dayOfWeek];
       
       // Filter disponibilidades for this day of week
-      const dispsDelDia = disponibilidades.filter(disp => disp.diaSemana === diaSemana && disp.activo);
+      const dispsDelDia = Array.isArray(disponibilidades) 
+        ? disponibilidades.filter(disp => disp.diaSemana === diaSemana && disp.activo)
+        : [];
       
       if (dispsDelDia.length === 0) {
         setAvailableTimes([]);
@@ -208,8 +218,11 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
       // Format the date as YYYY-MM-DD for comparison
       const formattedDate = format(date, 'yyyy-MM-dd');
       
+      // Ensure existingAppointments is an array
+      const appointments = Array.isArray(existingAppointments) ? existingAppointments : [];
+      
       // Filter already booked appointments for this day
-      const todaysAppointments = existingAppointments.filter(appt => {
+      const todaysAppointments = appointments.filter(appt => {
         return appt.fecha === formattedDate;
       });
       

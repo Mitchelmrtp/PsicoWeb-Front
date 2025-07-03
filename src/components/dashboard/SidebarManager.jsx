@@ -1,18 +1,15 @@
 import { useAuth } from '../../hooks/useAuth';
-import Sidebar from './Sidebar';
-import PsicologoSidebar from './PsicologoSidebar';
+import NavigationSidebar from '../layout/NavigationSidebar';
 
+// DEPRECATED: Este componente será reemplazado por NavigationSidebar
+// Mantenido temporalmente para compatibilidad
 const SidebarManager = () => {
   const { user } = useAuth();
 
   if (!user) return null;
 
-  // Return the appropriate sidebar based on user role
-  if (user.role === 'psicologo') {
-    return <PsicologoSidebar />;
-  } else {
-    return <Sidebar />;
-  }
+  // Usar el nuevo NavigationSidebar que es adaptativo por rol
+  return <NavigationSidebar />;
 };
 
 export default SidebarManager;

@@ -4,6 +4,35 @@ import { ENDPOINTS, getAuthHeader } from '../../config/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../hooks/useAuth';
 
+// Helper functions for interpreting test results
+const interpretarNivelAnsiedad = (puntuacion) => {
+  if (puntuacion <= 1.5) return 'Mínima';
+  if (puntuacion <= 2.5) return 'Leve';
+  if (puntuacion <= 3.5) return 'Moderada';
+  return 'Severa';
+};
+
+const interpretarNivelDepresion = (puntuacion) => {
+  if (puntuacion <= 1.5) return 'Mínima';
+  if (puntuacion <= 2.5) return 'Leve';
+  if (puntuacion <= 3.5) return 'Moderada';
+  return 'Severa';
+};
+
+const interpretarNivelEstres = (puntuacion) => {
+  if (puntuacion <= 1.5) return 'Bajo';
+  if (puntuacion <= 2.5) return 'Moderado';
+  if (puntuacion <= 3.5) return 'Alto';
+  return 'Severo';
+};
+
+const interpretarNivelGeneral = (puntuacion) => {
+  if (puntuacion <= 1.5) return 'Bajo';
+  if (puntuacion <= 2.5) return 'Moderado';
+  if (puntuacion <= 3.5) return 'Alto';
+  return 'Significativo';
+};
+
 const TestPage = () => {
   const { testId } = useParams();
   const { user } = useAuth();
@@ -56,9 +85,12 @@ const TestPage = () => {
         
         console.log('Test data received:', data);
         
+        // Extract the test data from the response if it's in a data property
+        const testData = data.data || data;
+        
         // Asegúrate de que las preguntas tengan arrays de opciones válidos
-        if (data.Preguntas && Array.isArray(data.Preguntas)) {
-          data.Preguntas = data.Preguntas.map(question => {
+        if (testData.Preguntas && Array.isArray(testData.Preguntas)) {
+          testData.Preguntas = testData.Preguntas.map(question => {
             let opciones = question.opciones;
             
             // Si opciones es string, intentar parsearlo como JSON
@@ -84,13 +116,13 @@ const TestPage = () => {
           
           // Inicializar las respuestas
           const initialResponses = {};
-          data.Preguntas.forEach(pregunta => {
+          testData.Preguntas.forEach(pregunta => {
             initialResponses[pregunta.id] = null;
           });
           setResponses(initialResponses);
         }
         
-        setTest(data);
+        setTest(testData);
       } catch (err) {
         console.error('Error loading test:', err);
         setError(err.message || 'Error al cargar la prueba');
@@ -131,36 +163,19 @@ const TestPage = () => {
 
     try {
       setSubmitting(true);
-      
-      // Format responses for submission
-      const formattedResponses = Object.entries(responses).map(([questionId, optionIndex]) => {
-        const question = test.Preguntas.find(p => p.id === questionId);
-        
-        // Add checks to prevent issues with missing data
-        if (!question) {
-          console.error(`Question with ID ${questionId} not found`);
-          return null;
-        }
-        
-        // Handle the case where options might be missing
-        const answer = question.opciones && question.opciones[optionIndex] 
-          ? question.opciones[optionIndex] 
-          : `Option ${optionIndex + 1}`;
-        
-        return {
-          questionId,
-          question: question.enunciado,
-          answer: answer,
-          value: optionIndex + 1, // Convert to 1-5 scale (for Likert)
-          score: (optionIndex + 1) * (question.pesoEvaluativo || 1)
-        };
-      }).filter(Boolean); // Remove any null entries
-      
-      // Calculate total score and average
-      const puntuacionTotal = formattedResponses.reduce((sum, item) => sum + item.score, 0);
+
+      // Format responses for submission - ensure consistent format
+      const formattedResponses = Object.entries(responses).map(([questionId, optionIndex]) => ({
+        idPregunta: questionId,
+        respuesta: optionIndex,  // Send as number
+        puntuacion: optionIndex + 1
+      }));
+
+      // Calcular puntuaciones
+      const puntuacionTotal = formattedResponses.reduce((sum, r) => sum + r.puntuacion, 0);
       const puntuacionPromedio = puntuacionTotal / formattedResponses.length;
-      
-      // Generate interpretation based on score
+
+      // Generar interpretación basada en el tipo de test
       let interpretacion = '';
       if (test.titulo.toLowerCase().includes('ansiedad')) {
         interpretacion = `Nivel de ansiedad: ${interpretarNivelAnsiedad(puntuacionPromedio)}`;
@@ -171,93 +186,20 @@ const TestPage = () => {
       } else {
         interpretacion = `Nivel general: ${interpretarNivelGeneral(puntuacionPromedio)}`;
       }
-      
-      // Prepare data to match backend schema
+
       const datos = {
-        idPaciente: user.userId, // Only using userId, not considering user.id
-        resultado: JSON.stringify(formattedResponses),
-        interpretacion: interpretacion,
-        puntuacionTotal: puntuacionTotal,
-        puntuacionPromedio: puntuacionPromedio
-      };
-      
-      // Add debug logging to see what ID we're using
-      console.log('Using patient ID for submission:', user?.id || user?.userId);
-      
-      console.log('Submitting test result:', datos);
-      console.log('Request URL:', `${ENDPOINTS.PRUEBAS}/${testId}/resultados`);
-      console.log('Request headers:', {
-        'Content-Type': 'application/json',
-        ...getAuthHeader(),
-      });
-      console.log('Request body:', JSON.stringify(datos, null, 2));
-      
-      const resultResponse = await fetch(`${ENDPOINTS.PRUEBAS}/${testId}/resultados`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify(datos)
-      });
-
-      if (!resultResponse.ok) {
-        // Get detailed error information
-        const errorText = await resultResponse.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-          console.error('Server validation errors:', errorData.error); // Log the specific validation errors
-        } catch (e) {
-          console.error('Server response (non-JSON):', errorText);
-        }
-        throw new Error(`Error submitting test result: ${errorData?.message || resultResponse.statusText}`);
-      }
-
-      const resultData = await resultResponse.json();
-      
-      toast.success('Prueba completada correctamente');
-      navigate(`/resultados/${resultData.id}`); // Make sure this path matches your routes
-      
-    } catch (err) {
-      console.error('Error submitting test:', err);
-      toast.error(`Error al enviar la prueba: ${err.message}`);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // En la función handleSubmitTest:
-
-  const handleSubmitTest = async (respuestasFormateadas) => {
-    try {
-      setSubmitting(true);
-      
-      // Calcular puntuación total
-      const puntuacionTotal = respuestasFormateadas.reduce((sum, item) => sum + item.score, 0);
-      const puntuacionPromedio = puntuacionTotal / respuestasFormateadas.length;
-      
-      // Generar interpretación basada en puntuación
-      let interpretacion = '';
-      if (test.titulo.toLowerCase().includes('ansiedad')) {
-        interpretacion = `Nivel de ansiedad: ${interpretarNivelAnsiedad(puntuacionPromedio)}`;
-      } else if (test.titulo.toLowerCase().includes('depresion') || test.titulo.toLowerCase().includes('depresión')) {
-        interpretacion = `Nivel de depresión: ${interpretarNivelDepresion(puntuacionPromedio)}`;
-      } else if (test.titulo.toLowerCase().includes('estres') || test.titulo.toLowerCase().includes('estrés')) {
-        interpretacion = `Nivel de estrés: ${interpretarNivelEstres(puntuacionPromedio)}`;
-      } else {
-        interpretacion = `Nivel general: ${interpretarNivelGeneral(puntuacionPromedio)}`;
-      }
-      
-      const datos = {
+        idPrueba: testId,
         idPaciente: user.userId,
-        resultado: JSON.stringify(respuestasFormateadas),
-        interpretacion: interpretacion,
-        puntuacionTotal: puntuacionTotal,
-        puntuacionPromedio: puntuacionPromedio
+        respuestas: formattedResponses,
+        interpretacion,
+        puntuacionTotal,
+        puntuacionPromedio
       };
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pruebas/${testId}/resultados`, {
+
+      console.log('Enviando resultado:', datos);
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
+      const response = await fetch(`${API_URL}/pruebas/${testId}/resultados`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -265,55 +207,28 @@ const TestPage = () => {
         },
         body: JSON.stringify(datos)
       });
-      
+
       if (!response.ok) {
-        throw new Error('Error al enviar resultados');
+        const errorText = await response.text();
+        console.error('Error response:', response.status, errorText);
+        throw new Error(`Error al enviar los resultados: ${response.status}`);
       }
-      
+
       const data = await response.json();
+      console.log('Test result submission successful:', data);
       
-      // Redirigir a la página de resultados
-      navigate(`/resultados/${data.id}`);
-      toast.success('Test completado con éxito');
+      // Extract the ID from the response
+      const resultData = data.data || data;
+      const resultId = resultData.id;
+      
+      toast.success('Prueba completada correctamente');
+      navigate(`/resultados/${resultId}`);
     } catch (err) {
-      console.error('Error submitting test:', err);
-      toast.error('Error al enviar resultados');
+      console.error('Error al enviar la prueba:', err);
+      toast.error(err.message || 'Error al enviar los resultados');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Funciones de interpretación según el tipo de test
-  const interpretarNivelAnsiedad = (puntuacion) => {
-    if (puntuacion >= 4.5) return 'Ansiedad severa';
-    if (puntuacion >= 3.5) return 'Ansiedad moderada';
-    if (puntuacion >= 2.5) return 'Ansiedad leve';
-    if (puntuacion >= 1.5) return 'Ansiedad mínima';
-    return 'Sin ansiedad';
-  };
-
-  const interpretarNivelDepresion = (puntuacion) => {
-    if (puntuacion >= 4.5) return 'Depresión severa';
-    if (puntuacion >= 3.5) return 'Depresión moderada';
-    if (puntuacion >= 2.5) return 'Depresión leve';
-    if (puntuacion >= 1.5) return 'Depresión mínima';
-    return 'Sin depresión';
-  };
-
-  const interpretarNivelEstres = (puntuacion) => {
-    if (puntuacion >= 4.5) return 'Estrés severo';
-    if (puntuacion >= 3.5) return 'Estrés moderado';
-    if (puntuacion >= 2.5) return 'Estrés leve';
-    if (puntuacion >= 1.5) return 'Estrés mínimo';
-    return 'Sin estrés';
-  };
-
-  const interpretarNivelGeneral = (puntuacion) => {
-    if (puntuacion >= 4.5) return 'Nivel muy alto';
-    if (puntuacion >= 3.5) return 'Nivel alto';
-    if (puntuacion >= 2.5) return 'Nivel medio';
-    if (puntuacion >= 1.5) return 'Nivel bajo';
-    return 'Nivel muy bajo';
   };
 
   useEffect(() => {
@@ -341,6 +256,24 @@ const TestPage = () => {
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p>{error || 'No se pudo cargar la prueba'}</p>
+          <button
+            onClick={() => navigate('/testmenu')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if test.Preguntas exists and has elements before accessing
+  if (!test.Preguntas || !Array.isArray(test.Preguntas) || test.Preguntas.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+          <p>Esta prueba no contiene preguntas</p>
           <button
             onClick={() => navigate('/testmenu')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"

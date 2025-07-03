@@ -29,8 +29,10 @@ const TestManagement = () => {
           throw new Error('Error fetching tests');
         }
 
-        const data = await response.json();
-        setTests(data);
+        const responseData = await response.json();
+        // Handle both array and { data: Array } response formats
+        const testsData = Array.isArray(responseData) ? responseData : (responseData.data || []);
+        setTests(testsData);
       } catch (err) {
         console.error('Error loading tests:', err);
         setError(err.message);
@@ -94,14 +96,17 @@ const TestManagement = () => {
 
       console.log('Test details received:', data);
       
-      // Verificar si existe la propiedad Preguntas
-      if (data.Preguntas) {
-        if (!Array.isArray(data.Preguntas)) {
-          console.error('Preguntas is not an array:', data.Preguntas);
-          data.Preguntas = [];
-        }
+      // Extract data from the wrapped response if needed
+      const testData = data.data || data;
+      console.log('Extracted test data:', testData);
+      
+      // Check for questions in either 'Preguntas' (uppercase) or 'preguntas' (lowercase)
+      const questions = testData.Preguntas || testData.preguntas || [];
+      
+      if (Array.isArray(questions) && questions.length > 0) {
+        console.log('Questions found:', questions);
         
-        const processedQuestions = data.Preguntas.map(question => {
+        const processedQuestions = questions.map(question => {
           let opciones = question.opciones;
           if (typeof opciones === 'string') {
             try {
@@ -122,7 +127,7 @@ const TestManagement = () => {
         
         setTestQuestions(processedQuestions);
       } else {
-        console.warn('No questions property found in response:', data);
+        console.warn('No questions found in response:', testData);
         setTestQuestions([]);
       }
     } catch (err) {
@@ -183,7 +188,7 @@ const TestManagement = () => {
           <div className="bg-red-50 p-4 rounded-lg text-red-700">
             {error}. Por favor intente de nuevo.
           </div>
-        ) : tests.length === 0 ? (
+        ) : !tests || tests.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-6 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -193,7 +198,7 @@ const TestManagement = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {tests.map((test) => (
+            {Array.isArray(tests) && tests.map((test) => (
               <div key={test.id} className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="p-5">
                   <div className="flex justify-between items-start">

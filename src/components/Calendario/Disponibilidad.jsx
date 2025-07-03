@@ -129,11 +129,14 @@ const Disponibilidad = () => {
     e.preventDefault()
     
     try {
+      console.log('Enviando datos de disponibilidad:', nuevaDisponibilidad);
+      
       if (editingId) {
         await disponibilidadService.updateDisponibilidad(editingId, nuevaDisponibilidad)
         toast.success('Disponibilidad actualizada correctamente')
       } else {
-        await disponibilidadService.createDisponibilidad(nuevaDisponibilidad)
+        const resultado = await disponibilidadService.createDisponibilidad(nuevaDisponibilidad)
+        console.log('Respuesta del servidor:', resultado);
         toast.success('Disponibilidad creada correctamente')
       }
       
@@ -147,7 +150,8 @@ const Disponibilidad = () => {
       setEditingId(null)
       fetchDisponibilidades()
     } catch (err) {
-      toast.error(err.message || 'Error al guardar la disponibilidad')
+      console.error('Error detallado:', err);
+      toast.error(`Error: ${err.message || 'Error al guardar la disponibilidad'}`);
     }
   }
   

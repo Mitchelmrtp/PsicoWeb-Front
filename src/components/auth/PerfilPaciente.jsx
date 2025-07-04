@@ -52,8 +52,14 @@ const PerfilPaciente = () => {
 
         if (!response.ok) {
           if (response.status === 403) {
-            setError('No tienes permiso para acceder a este perfil de paciente');
+            setError(`No tienes permiso para acceder a este perfil de paciente. Tu rol: ${user?.role || user?.rol || 'no definido'}, ID: ${user?.id || 'no definido'}`);
             console.error('Error 403: Acceso denegado al perfil de paciente');
+            console.log('Información del usuario:', {
+              id: user?.id,
+              role: user?.role,
+              rol: user?.rol,
+              pacienteId: pacienteId
+            });
             setLoading(false);
             return;
           } else if (response.status === 404) {

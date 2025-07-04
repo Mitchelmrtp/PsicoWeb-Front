@@ -144,12 +144,13 @@ class ChatService extends BaseApiService {
    */
   async getAvailableContacts(userId, userRole) {
     try {
-      console.log('getAvailableContacts called with:', userId, userRole);
+      console.log('=== CHAT: getAvailableContacts called ===');
+      console.log('User ID:', userId, 'User Role:', userRole);
       let contacts = [];
       
       if (userRole === 'psicologo') {
         // Para psicólogos: obtener pacientes asignados
-        console.log('Fetching patients for psychologist');
+        console.log('=== CHAT: Fetching patients for psychologist ===');
         // Correct URL based on the actual backend route 
         const pacientesUrl = `${ENDPOINTS.BASE_URL}/psicologos/${userId}/pacientes`;
         console.log('Patients URL:', pacientesUrl);
@@ -165,33 +166,52 @@ class ChatService extends BaseApiService {
           });
           
           console.log('Patients response status:', pacientesResponse.status);
+          console.log('Patients response headers:', Object.fromEntries(pacientesResponse.headers.entries()));
           
           if (!pacientesResponse.ok) {
             const errorText = await pacientesResponse.text();
-            console.error('Failed to fetch patients:', errorText);
-            throw new Error(`Error al cargar pacientes: ${pacientesResponse.status} - ${errorText}`);
-          }
-          
-          const pacientesData = await pacientesResponse.json();
-          console.log('Patients data:', pacientesData);
-          
-          if (pacientesData && pacientesData.data) {
-            contacts = pacientesData.data.map(paciente => ({
-              id: paciente.id,
-              nombre: paciente.user ? `${paciente.user.first_name || ''} ${paciente.user.last_name || ''}`.trim() : 'Paciente',
-              email: paciente.user?.email || '',
-              tipo: 'paciente'
-            }));
+            console.error('=== CHAT: Failed to fetch patients ===');
+            console.error('Status:', pacientesResponse.status);
+            console.error('Status Text:', pacientesResponse.statusText);
+            console.error('Error response:', errorText);
+            console.error('Request URL was:', pacientesUrl);
+            console.error('Request headers were:', headers);
+            
+            // Don't throw error, continue to try other contacts
+            console.warn('Continuing without patients due to error...');
           } else {
-            console.warn('Patients data is missing or has invalid structure:', pacientesData);
+            const pacientesData = await pacientesResponse.json();
+            console.log('=== CHAT: Patients data received ===');
+            console.log('Raw patients data:', JSON.stringify(pacientesData, null, 2));
+            
+            if (pacientesData && pacientesData.data && Array.isArray(pacientesData.data)) {
+              const patientContacts = pacientesData.data.map(paciente => {
+                console.log('Processing patient:', paciente);
+                return {
+                  id: paciente.id,
+                  nombre: paciente.user ? `${paciente.user.first_name || ''} ${paciente.user.last_name || ''}`.trim() : 'Paciente',
+                  email: paciente.user?.email || '',
+                  tipo: 'paciente'
+                };
+              });
+              contacts = patientContacts;
+              console.log('=== CHAT: Patient contacts added ===');
+              console.log('Patient contacts:', patientContacts);
+            } else {
+              console.warn('=== CHAT: Patients data is missing or has invalid structure ===');
+              console.warn('Expected data.data array, got:', typeof pacientesData?.data, pacientesData?.data);
+            }
           }
         } catch (err) {
-          console.error('Error fetching patients:', err);
+          console.error('=== CHAT: Error fetching patients ===');
+          console.error('Error details:', err);
+          console.error('Error message:', err.message);
+          console.error('Error stack:', err.stack);
           // Continue execution to try to fetch psychologists
         }
         
         // También obtener otros psicólogos
-        console.log('Fetching other psychologists');
+        console.log('=== CHAT: Fetching other psychologists ===');
         // Fix: Use the correct API route for getting all psychologists
         const psicologosUrl = `${ENDPOINTS.BASE_URL}/psicologos`;
         console.log('Psychologists URL:', psicologosUrl);
@@ -203,37 +223,52 @@ class ChatService extends BaseApiService {
           });
           
           console.log('Psychologists response status:', psicologosResponse.status);
+          console.log('Psychologists response headers:', Object.fromEntries(psicologosResponse.headers.entries()));
           
           if (psicologosResponse.ok) {
             const psicologosData = await psicologosResponse.json();
-            console.log('Psychologists data:', psicologosData);
+            console.log('=== CHAT: Psychologists data received ===');
+            console.log('Raw psychologists data:', JSON.stringify(psicologosData, null, 2));
             
-            if (psicologosData && psicologosData.data) {
+            if (psicologosData && psicologosData.data && Array.isArray(psicologosData.data)) {
               const otrosPsicologos = psicologosData.data
                 .filter(p => p.id !== userId)
-                .map(psicologo => ({
-                  id: psicologo.id,
-                  nombre: psicologo.user ? `${psicologo.user.first_name || ''} ${psicologo.user.last_name || ''}`.trim() : 'Psicólogo',
-                  email: psicologo.user?.email || '',
-                  tipo: 'psicologo'
-                }));
+                .map(psicologo => {
+                  console.log('Processing psychologist:', psicologo);
+                  return {
+                    id: psicologo.id,
+                    nombre: psicologo.user ? `${psicologo.user.first_name || ''} ${psicologo.user.last_name || ''}`.trim() : 'Psicólogo',
+                    email: psicologo.user?.email || '',
+                    tipo: 'psicologo'
+                  };
+                });
                 
+              console.log('=== CHAT: Other psychologists processed ===');
               console.log('Other psychologists:', otrosPsicologos);
               contacts = [...contacts, ...otrosPsicologos];
+              console.log('=== CHAT: All contacts after adding psychologists ===');
+              console.log('Total contacts:', contacts);
             } else {
-              console.warn('Psychologists data is missing or has invalid structure:', psicologosData);
+              console.warn('=== CHAT: Psychologists data is missing or has invalid structure ===');
+              console.warn('Expected data.data array, got:', typeof psicologosData?.data, psicologosData?.data);
             }
           } else {
             const errorText = await psicologosResponse.text();
-            console.error('Failed to fetch psychologists:', errorText);
+            console.error('=== CHAT: Failed to fetch psychologists ===');
+            console.error('Status:', psicologosResponse.status);
+            console.error('Status Text:', psicologosResponse.statusText);
+            console.error('Error response:', errorText);
           }
         } catch (err) {
-          console.error('Error fetching other psychologists:', err);
+          console.error('=== CHAT: Error fetching other psychologists ===');
+          console.error('Error details:', err);
+          console.error('Error message:', err.message);
+          console.error('Error stack:', err.stack);
           // Continue with whatever contacts we have
         }
       } else if (userRole === 'paciente') {
         // Para pacientes: obtener psicólogo asignado
-        console.log('Fetching assigned psychologist for patient');
+        console.log('=== CHAT: Fetching assigned psychologist for patient ===');
         // Fix: Use the correct API route for getting patient info
         const pacienteUrl = `${ENDPOINTS.BASE_URL}/pacientes/${userId}`;
         console.log('Patient URL:', pacienteUrl);
@@ -245,18 +280,29 @@ class ChatService extends BaseApiService {
           });
           
           console.log('Patient response status:', pacienteResponse.status);
+          console.log('Patient response headers:', Object.fromEntries(pacienteResponse.headers.entries()));
           
           if (!pacienteResponse.ok) {
             const errorText = await pacienteResponse.text();
-            console.error('Failed to fetch patient:', errorText);
-            throw new Error(`Error al cargar información del paciente: ${pacienteResponse.status} - ${errorText}`);
+            console.error('=== CHAT: Failed to fetch patient ===');
+            console.error('Status:', pacienteResponse.status);
+            console.error('Status Text:', pacienteResponse.statusText);
+            console.error('Error response:', errorText);
+            console.error('Request URL was:', pacienteUrl);
+            
+            // Don't throw error, return empty contacts instead
+            console.warn('Returning empty contacts due to patient fetch error');
+            return [];
           }
           
           const pacienteData = await pacienteResponse.json();
-          console.log('Patient data:', pacienteData);
+          console.log('=== CHAT: Patient data received ===');
+          console.log('Raw patient data:', JSON.stringify(pacienteData, null, 2));
           
           if (pacienteData.data && pacienteData.data.idPsicologo) {
-            console.log('Found psychologist ID for patient:', pacienteData.data.idPsicologo);
+            console.log('=== CHAT: Found psychologist ID for patient ===');
+            console.log('Psychologist ID:', pacienteData.data.idPsicologo);
+            
             // Fix: Use the correct API route for getting psychologist info
             const psicologoUrl = `${ENDPOINTS.BASE_URL}/psicologos/${pacienteData.data.idPsicologo}`;
             console.log('Psychologist URL:', psicologoUrl);
@@ -266,36 +312,57 @@ class ChatService extends BaseApiService {
               headers: this.getHeaders()
             });
           
-          console.log('Psychologist response status:', psicologoResponse.status);
+            console.log('Psychologist response status:', psicologoResponse.status);
+            console.log('Psychologist response headers:', Object.fromEntries(psicologoResponse.headers.entries()));
           
-          if (psicologoResponse.ok) {
-            const psicologoData = await psicologoResponse.json();
-            console.log('Psychologist data:', psicologoData);
-            
-            contacts = [{
-              id: psicologoData.data.id,
-              nombre: psicologoData.data.user ? `${psicologoData.data.user.first_name || ''} ${psicologoData.data.user.last_name || ''}`.trim() : 'Mi Psicólogo',
-              email: psicologoData.data.user?.email || '',
-              tipo: 'psicologo'
-            }];
-            
-            console.log('Added psychologist to contacts:', contacts);
+            if (psicologoResponse.ok) {
+              const psicologoData = await psicologoResponse.json();
+              console.log('=== CHAT: Psychologist data received ===');
+              console.log('Raw psychologist data:', JSON.stringify(psicologoData, null, 2));
+              
+              const psychologistContact = {
+                id: psicologoData.data.id,
+                nombre: psicologoData.data.user ? `${psicologoData.data.user.first_name || ''} ${psicologoData.data.user.last_name || ''}`.trim() : 'Mi Psicólogo',
+                email: psicologoData.data.user?.email || '',
+                tipo: 'psicologo'
+              };
+              
+              contacts = [psychologistContact];
+              console.log('=== CHAT: Added psychologist to contacts ===');
+              console.log('Psychologist contact:', psychologistContact);
+            } else {
+              const errorText = await psicologoResponse.text();
+              console.error('=== CHAT: Failed to fetch psychologist ===');
+              console.error('Status:', psicologoResponse.status);
+              console.error('Status Text:', psicologoResponse.statusText);
+              console.error('Error response:', errorText);
+            }
           } else {
-            const errorText = await psicologoResponse.text();
-            console.error('Failed to fetch psychologist:', errorText);
-          }
-          } else {
-            console.log('No psychologist assigned to this patient');
+            console.log('=== CHAT: No psychologist assigned to this patient ===');
+            console.log('Patient data structure:', pacienteData.data);
           }
         } catch (err) {
-          console.error('Error fetching patient or psychologist information:', err);
+          console.error('=== CHAT: Error fetching patient or psychologist information ===');
+          console.error('Error details:', err);
+          console.error('Error message:', err.message);
+          console.error('Error stack:', err.stack);
         }
       }
       
+      console.log('=== CHAT: getAvailableContacts final result ===');
+      console.log('Final contacts:', contacts);
+      console.log('Contact count:', contacts.length);
       return contacts;
     } catch (error) {
-      console.error('Error getting available contacts:', error);
-      throw error;
+      console.error('=== CHAT: Error getting available contacts ===');
+      console.error('Error details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('User ID was:', userId);
+      console.error('User role was:', userRole);
+      
+      // Return empty array instead of throwing
+      return [];
     }
   }
 
@@ -388,12 +455,17 @@ class ChatService extends BaseApiService {
     const token = localStorage.getItem('token');
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('Using token from localStorage');
+      console.log('=== CHAT: Using token from localStorage ===');
+      console.log('Token exists:', !!token);
+      console.log('Token length:', token.length);
+      console.log('Token preview:', token.substring(0, 20) + '...');
     } else {
-      console.warn('No authentication token found in localStorage');
+      console.warn('=== CHAT: No authentication token found in localStorage ===');
+      console.warn('Available localStorage keys:', Object.keys(localStorage));
     }
     
-    console.log('Request headers:', headers);
+    console.log('=== CHAT: Request headers prepared ===');
+    console.log('Headers:', headers);
     return headers;
   }
 }

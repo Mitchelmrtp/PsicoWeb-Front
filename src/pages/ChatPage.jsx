@@ -288,7 +288,9 @@ const ChatPage = () => {
         
         {/* Depurador de API de chat - visible solo cuando está activado */}
         {showDebugger && (
-          <ChatDebugger />
+          <>
+            <ChatDebugger />
+          </>
         )}
         
         {/* Contenedor principal con layout responsive */}

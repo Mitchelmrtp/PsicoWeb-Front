@@ -26,6 +26,9 @@ export const ENDPOINTS = {
   DISPONIBILIDAD: `${API_URL}/disponibilidad`,
   // Endpoint para el chat
   CHAT: `${API_URL}/chat`,
+  // Endpoints para objetivos y ejercicios
+  OBJETIVOS: `${API_URL}/objetivos`,
+  EJERCICIOS: `${API_URL}/ejercicios`,
 };
 
 export const getAuthHeader = () => {

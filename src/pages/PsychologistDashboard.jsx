@@ -104,7 +104,7 @@ const PsychologistDashboard = () => {
             <Card.Content>
               <AppointmentList
                 appointments={appointments}
-                loading={appointmentsLoading}
+                isLoading={appointmentsLoading}
                 error={error}
                 title=""
                 emptyMessage="No hay citas en esta categoría"

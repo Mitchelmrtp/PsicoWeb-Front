@@ -125,7 +125,7 @@ const PacientesPage = () => {
         <main className="p-6">
           <PatientsList 
             patients={filteredPatients}
-            loading={loading}
+            isLoading={loading}
             error={error}
           />
         </main>

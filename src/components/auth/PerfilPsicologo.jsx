@@ -140,23 +140,43 @@ const PerfilPsicologo = () => {
 
   const handleSave = async () => {
     try {
+      // Limpiar campos vacíos y convertir números
+      const cleanedFormData = {};
+      Object.keys(formData).forEach(key => {
+        const value = formData[key];
+        if (value !== '' && value !== null && value !== undefined) {
+          if (key === 'anosExperiencia') {
+            cleanedFormData[key] = value === '' ? null : parseInt(value) || null;
+          } else if (key === 'tarifaPorSesion') {
+            cleanedFormData[key] = value === '' ? null : parseFloat(value) || null;
+          } else {
+            cleanedFormData[key] = value;
+          }
+        }
+      });
+
+      console.log('Enviando datos:', cleanedFormData);
+
       const response = await fetch(`${ENDPOINTS.PSICOLOGOS}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedFormData),
       });
 
       if (!response.ok) {
-        throw new Error('Error al actualizar el perfil');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Error ${response.status}: ${errorData}`);
       }
 
       const updatedData = await response.json();
       setPsicologo(updatedData.data || updatedData);
       setIsEditing(false);
     } catch (err) {
+      console.error('Error al guardar:', err);
       setError(err.message);
     }
   };

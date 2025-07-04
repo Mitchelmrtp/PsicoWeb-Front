@@ -6,6 +6,7 @@ import { AuthService, ProfileService } from './authService';
 import TestService from './testService';
 import { PatientService, PsychologistService } from './userService';
 import { SessionService, CalendarService, AvailabilityService } from './sessionService';
+import { ObjetivosService, EjerciciosService } from './objetivosService';
 
 // Instancias singleton de los servicios
 const authService = new AuthService();
@@ -16,6 +17,8 @@ const psychologistService = new PsychologistService();
 const sessionService = new SessionService();
 const calendarService = new CalendarService();
 const availabilityService = new AvailabilityService();
+const objetivosService = new ObjetivosService();
+const ejerciciosService = new EjerciciosService();
 
 // Factory para crear servicios - permite fácil testing y mocking
 export const createApiServices = () => ({
@@ -27,6 +30,8 @@ export const createApiServices = () => ({
   session: sessionService,
   calendar: calendarService,
   availability: availabilityService,
+  objetivos: objetivosService,
+  ejercicios: ejerciciosService,
 });
 
 // Exportación directa para uso inmediato
@@ -42,6 +47,8 @@ export {
   SessionService,
   CalendarService,
   AvailabilityService,
+  ObjetivosService,
+  EjerciciosService,
   authService,
   profileService,
   testService,
@@ -50,4 +57,6 @@ export {
   sessionService,
   calendarService,
   availabilityService,
+  objetivosService,
+  ejerciciosService,
 };

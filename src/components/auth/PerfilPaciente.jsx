@@ -145,23 +145,37 @@ const PerfilPaciente = () => {
 
   const handleSave = async () => {
     try {
+      // Limpiar campos vacíos
+      const cleanedFormData = {};
+      Object.keys(formData).forEach(key => {
+        const value = formData[key];
+        if (value !== '' && value !== null && value !== undefined) {
+          cleanedFormData[key] = value;
+        }
+      });
+
+      console.log('Enviando datos:', cleanedFormData);
+
       const response = await fetch(`${ENDPOINTS.PACIENTES}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cleanedFormData),
       });
 
       if (!response.ok) {
-        throw new Error('Error al actualizar el perfil');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Error ${response.status}: ${errorData}`);
       }
 
       const updatedData = await response.json();
       setPaciente(updatedData.data || updatedData);
       setIsEditing(false);
     } catch (err) {
+      console.error('Error al guardar:', err);
       setError(err.message);
     }
   };

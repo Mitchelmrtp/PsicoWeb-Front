@@ -2,9 +2,15 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '../../routes/routePaths';
 
 const PatientsList = ({ patients, loading, error }) => {
   const navigate = useNavigate();
+
+  const handleViewObjectives = (e, patientId) => {
+    e.stopPropagation(); // Prevent patient detail navigation
+    navigate(`/objetivos-paciente/${patientId}`);
+  };
   
   if (loading) {
     return (
@@ -58,17 +64,27 @@ const PatientsList = ({ patients, loading, error }) => {
                 </div>
               </div>
               
-              <div className="text-right">
-                <div className="text-xs text-gray-500">
-                  Última cita
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">
+                    Última cita
+                  </div>
+                  <div className="text-sm">
+                    {patient.lastAppointment ? (
+                      format(new Date(patient.lastAppointment), 'dd/MM/yyyy', { locale: es })
+                    ) : (
+                      'Sin citas previas'
+                    )}
+                  </div>
                 </div>
-                <div className="text-sm">
-                  {patient.lastAppointment ? (
-                    format(new Date(patient.lastAppointment), 'dd/MM/yyyy', { locale: es })
-                  ) : (
-                    'Sin citas previas'
-                  )}
-                </div>
+                
+                <button
+                  onClick={(e) => handleViewObjectives(e, patient.id)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                  title="Ver objetivos del paciente"
+                >
+                  Objetivos
+                </button>
               </div>
             </div>
             

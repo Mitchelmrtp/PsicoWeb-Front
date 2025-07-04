@@ -231,7 +231,7 @@ const ReservaCita = () => {
               citaData={reservaData}
               onBack={() => setStep(1)}
               onConfirm={handleConfirm}
-              loading={loading}
+              isLoading={loading}
             />
           )}
         </div>

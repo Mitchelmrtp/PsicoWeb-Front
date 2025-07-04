@@ -28,7 +28,13 @@ class BaseApiService {
         
         try {
           const parsedError = JSON.parse(errorData);
-          errorMessage = parsedError.message || `HTTP ${response.status}`;
+          // If there are detailed validation errors, format them nicely
+          if (parsedError.errors && Array.isArray(parsedError.errors)) {
+            const validationErrors = parsedError.errors.map(err => err.message).join(', ');
+            errorMessage = `${parsedError.message}: ${validationErrors}`;
+          } else {
+            errorMessage = parsedError.message || `HTTP ${response.status}`;
+          }
         } catch {
           errorMessage = `HTTP ${response.status}: ${errorData}`;
         }
@@ -70,6 +76,15 @@ class BaseApiService {
   async delete(endpoint = '', options = {}) {
     const url = `${this.baseEndpoint}${endpoint}`;
     return this.request(url, { ...options, method: 'DELETE' });
+  }
+
+  async patch(endpoint = '', data = null, options = {}) {
+    const url = `${this.baseEndpoint}${endpoint}`;
+    return this.request(url, {
+      ...options,
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
   
   // Método para enviar formData (para subida de archivos)

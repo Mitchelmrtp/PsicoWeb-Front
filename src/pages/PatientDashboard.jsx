@@ -77,7 +77,7 @@ const PatientDashboard = () => {
           {/* Lista de citas programadas */}
           <AppointmentList
             appointments={appointments}
-            loading={appointmentsLoading}
+            isLoading={appointmentsLoading}
             error={error}
             title="Citas Programadas"
             emptyMessage="No tienes citas programadas. ¡Reserva tu primera sesión!"

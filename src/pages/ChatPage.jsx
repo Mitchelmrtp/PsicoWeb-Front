@@ -329,7 +329,7 @@ const ChatPage = () => {
                 <div id="contacts-tab" role="tabpanel" aria-labelledby="contacts-tab-button" className="h-full">
                   <ContactList 
                     onSelectContact={handleSelectContact}
-                    loading={creatingChat}
+                    isLoading={creatingChat}
                   />
                 </div>
               )}

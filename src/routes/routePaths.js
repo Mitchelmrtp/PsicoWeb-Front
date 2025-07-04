@@ -48,6 +48,10 @@ export const ROUTE_PATHS = {
   HELP: "/help",
   CALENDARIO: "/calendario",
   CONSULTAS_ONLINE: "/consultas-online",
+  
+  // Objetivos del paciente
+  OBJETIVOS_PACIENTE: "/objetivos-paciente/:pacienteId",
+  MIS_OBJETIVOS: "/mis-objetivos",
 };
 
 // Generadores de rutas dinámicas
@@ -59,12 +63,18 @@ export const createDynamicRoute = (path, params) => {
   return route;
 };
 
+// Helper function for objectives route
+export const createObjetivosRoute = (pacienteId) => {
+  return createDynamicRoute(ROUTE_PATHS.OBJETIVOS_PACIENTE, { pacienteId });
+};
+
 // Rutas de navegación comunes
 export const NAVIGATION_ROUTES = {
   PATIENT: [
     { path: ROUTE_PATHS.DASHBOARD, label: "Dashboard", icon: "dashboard" },
     { path: ROUTE_PATHS.RESERVA, label: "Reservar Cita", icon: "calendar" },
     { path: ROUTE_PATHS.TEST_MENU, label: "Pruebas", icon: "test" },
+    { path: ROUTE_PATHS.MIS_OBJETIVOS, label: "Mis Objetivos", icon: "target" },
     { path: ROUTE_PATHS.CONSULTAS, label: "Mis Consultas", icon: "consultation" },
     { path: ROUTE_PATHS.CHAT, label: "Mensajes", icon: "chat" },
     { path: ROUTE_PATHS.PERFIL_PACIENTE, label: "Perfil", icon: "profile" },
@@ -73,6 +83,7 @@ export const NAVIGATION_ROUTES = {
   PSYCHOLOGIST: [
     { path: ROUTE_PATHS.DASHBOARD, label: "Dashboard", icon: "dashboard" },
     { path: ROUTE_PATHS.PACIENTES, label: "Pacientes", icon: "patients" },
+    { path: ROUTE_PATHS.OBJETIVOS_PACIENTE, label: "Objetivos del Paciente", icon: "target" },
     { path: ROUTE_PATHS.DISPONIBILIDAD, label: "Mi disponibilidad", icon: "availability" },
     { path: ROUTE_PATHS.CONSULTAS, label: "Mis consultas", icon: "consultation" },
     { path: ROUTE_PATHS.CHAT, label: "Mensajes", icon: "chat" },

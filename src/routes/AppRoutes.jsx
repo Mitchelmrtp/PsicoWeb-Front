@@ -28,6 +28,9 @@ const ChatPage = lazy(() => import("../pages/ChatPage"));
 const PatientTestViewContainer = lazy(() => import("../components/test/PatientTestViewContainer"));
 const TestPageContainer = lazy(() => import("../components/test/TestPageContainer"));
 const TestResultDetailContainer = lazy(() => import("../components/test/TestResultDetailContainer"));
+// Componentes de objetivos
+const ObjetivosPacienteContainer = lazy(() => import("../components/objetivos/ObjetivosPacienteContainer"));
+const MisObjetivosContainer = lazy(() => import("../components/objetivos/MisObjetivosContainer"));
 
 // Componente de carga
 const LoadingSpinner = () => (
@@ -190,6 +193,24 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <TestResultDetailContainer />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de objetivos */}
+        <Route
+          path={ROUTE_PATHS.OBJETIVOS_PACIENTE}
+          element={
+            <ProtectedRoute>
+              <ObjetivosPacienteContainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_OBJETIVOS}
+          element={
+            <ProtectedRoute>
+              <MisObjetivosContainer />
             </ProtectedRoute>
           }
         />

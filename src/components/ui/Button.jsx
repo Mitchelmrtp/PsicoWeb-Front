@@ -24,6 +24,7 @@ const Button = forwardRef(({
   size = 'md', 
   isLoading = false,
   disabled = false,
+  fullWidth = false,
   className = '',
   ...props 
 }, ref) => {
@@ -39,6 +40,7 @@ const Button = forwardRef(({
     className,
     {
       'cursor-not-allowed opacity-50': isLoading || disabled,
+      'w-full': fullWidth,
     }
   );
 

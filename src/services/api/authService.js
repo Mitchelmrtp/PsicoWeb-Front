@@ -13,6 +13,7 @@ class AuthService extends BaseApiService {
   // Autenticación
   async login(credentials) {
     const response = await this.post('/login', credentials);
+    // The backend returns the data directly, not wrapped in a data property
     if (response.data?.token) {
       this.setAuthToken(response.data.token);
       if (response.data?.user) {

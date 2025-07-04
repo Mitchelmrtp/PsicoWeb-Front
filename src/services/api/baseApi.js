@@ -24,7 +24,16 @@ class BaseApiService {
       
       if (!response.ok) {
         const errorData = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorData}`);
+        let errorMessage;
+        
+        try {
+          const parsedError = JSON.parse(errorData);
+          errorMessage = parsedError.message || `HTTP ${response.status}`;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${errorData}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

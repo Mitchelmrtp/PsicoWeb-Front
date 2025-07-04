@@ -31,7 +31,7 @@ export const ENDPOINTS = {
 export const getAuthHeader = () => {
     const token = localStorage.getItem('token');
     if (!token) {
-        console.warn('No authentication token found');
+        // Only log this during actual authenticated requests, not login
         return {};
     }
     

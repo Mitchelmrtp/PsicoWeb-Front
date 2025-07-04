@@ -92,9 +92,10 @@ export const AuthStoreProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.LOGIN_START });
     try {
       const result = await authService.login(credentials);
+      // The response structure is result.data.user for the user info
       dispatch({ 
         type: AUTH_ACTIONS.LOGIN_SUCCESS, 
-        payload: { user: result.user } 
+        payload: { user: result.data?.user } 
       });
       return result;
     } catch (error) {

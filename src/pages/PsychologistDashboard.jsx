@@ -1,22 +1,30 @@
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { usePsychologistAppointments } from '../hooks/usePsychologistAppointments';
-import { usePsychologistPatients } from '../hooks/usePsychologistPatients';
-import NavigationSidebar from '../components/layout/NavigationSidebar';
-import AppointmentList from '../components/features/AppointmentList';
-import { Card, Button } from '../components/ui';
-import { useNavigate } from 'react-router-dom';
-import { ROUTE_PATHS } from '../routes/routePaths';
-import { FiMessageCircle, FiHeart, FiBarChart2, FiUsers } from 'react-icons/fi';
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { usePsychologistAppointments } from "../hooks/usePsychologistAppointments";
+import { usePsychologistPatients } from "../hooks/usePsychologistPatients";
+import NavigationSidebar from "../components/layout/NavigationSidebar";
+import AppointmentList from "../components/features/AppointmentList";
+import { Card, Button } from "../components/ui";
+import { useNavigate } from "react-router-dom";
+import { ROUTE_PATHS } from "../routes/routePaths";
+import { FiMessageCircle, FiHeart, FiBarChart2, FiUsers } from "react-icons/fi";
 
 // Dashboard del psicólogo refactorizado
 const PsychologistDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('próximas');
-  
-  const { appointments, loading: appointmentsLoading, error } = usePsychologistAppointments(user?.id, activeTab);
-  const { patients, loading: patientsLoading, error: patientsError } = usePsychologistPatients(user?.id);
+  const [activeTab, setActiveTab] = useState("próximas");
+
+  const {
+    appointments,
+    loading: appointmentsLoading,
+    error,
+  } = usePsychologistAppointments(user?.id, activeTab);
+  const {
+    patients,
+    loading: patientsLoading,
+    error: patientsError,
+  } = usePsychologistPatients(user?.id);
 
   const handleViewAppointment = (appointment) => {
     navigate(`/citas/${appointment.id}`);
@@ -31,38 +39,56 @@ const PsychologistDashboard = () => {
   };
 
   const tabs = [
-    { id: 'próximas', label: 'Próximas', count: appointments.length },
-    { id: 'pasadas', label: 'Pasadas', count: 0 },
-    { id: 'canceladas', label: 'Canceladas', count: 0 },
+    { id: "próximas", label: "Próximas", count: appointments.length },
+    { id: "pasadas", label: "Pasadas", count: 0 },
+    { id: "canceladas", label: "Canceladas", count: 0 },
   ];
+
+  const handleRegisterAttendance = async (appointmentId) => {
+    try {
+      await fetch(`/api/sesiones/${appointmentId}/asistencia`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      alert("Asistencia registrada exitosamente.");
+    } catch (err) {
+      console.error("Error al registrar asistencia:", err);
+      alert("Hubo un error al registrar la asistencia.");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
       <NavigationSidebar />
-      
+
       <div className="flex-1 overflow-y-auto">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-medium">
-              Hola, {user?.name || user?.first_name || 'Doctor'}
+              Hola, {user?.name || user?.first_name || "Doctor"}
             </h1>
             <h2 className="text-2xl font-bold">Reservaciones</h2>
           </div>
-          
+
           <div className="flex items-center space-x-4">
-            <select 
+            <select
               className="border border-gray-300 rounded-md px-3 py-2 bg-white"
               defaultValue={new Date().getMonth()}
-              onChange={(e) => {/* Month selector */}}
+              onChange={(e) => {
+                /* Month selector */
+              }}
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i} value={i}>
-                  {new Date(0, i).toLocaleDateString('es-ES', { month: 'long' })}
+                  {new Date(0, i).toLocaleDateString("es-ES", {
+                    month: "long",
+                  })}
                 </option>
               ))}
             </select>
-            
+
             <Button
               onClick={() => navigate(ROUTE_PATHS.DISPONIBILIDAD)}
               variant="outline"
@@ -78,15 +104,16 @@ const PsychologistDashboard = () => {
           <Card>
             <Card.Header>
               <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-                {tabs.map(tab => (
+                {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
                       px-4 py-2 rounded-md text-sm font-medium transition-colors
-                      ${activeTab === tab.id
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                      ${
+                        activeTab === tab.id
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
                       }
                     `}
                   >
@@ -100,7 +127,7 @@ const PsychologistDashboard = () => {
                 ))}
               </div>
             </Card.Header>
-            
+
             <Card.Content>
               <AppointmentList
                 appointments={appointments}
@@ -110,6 +137,7 @@ const PsychologistDashboard = () => {
                 emptyMessage="No hay citas en esta categoría"
                 onViewDetails={handleViewAppointment}
                 showViewAll={false}
+                onRegisterAttendance={handleRegisterAttendance}
               />
             </Card.Content>
           </Card>
@@ -119,19 +147,29 @@ const PsychologistDashboard = () => {
             <Card.Header>
               <div className="flex justify-between items-center">
                 <Card.Title>Mis Pacientes</Card.Title>
-                <Button 
+                <Button
                   onClick={() => navigate(ROUTE_PATHS.PACIENTES)}
                   variant="ghost"
                   size="sm"
                 >
                   Ver Todos
-                  <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-4 h-4 ml-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </Button>
               </div>
             </Card.Header>
-            
+
             <Card.Content>
               {patientsLoading ? (
                 <div className="flex justify-center py-8">
@@ -143,14 +181,26 @@ const PsychologistDashboard = () => {
                 </div>
               ) : patients.length === 0 ? (
                 <div className="text-center py-8">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
                   </svg>
-                  <p className="mt-2 text-sm text-gray-500">No tienes pacientes asignados aún</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    No tienes pacientes asignados aún
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {patients.slice(0, 6).map(patient => (
+                  {patients.slice(0, 6).map((patient) => (
                     <div key={patient.id} className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center mb-2">
                         <div className="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -159,22 +209,29 @@ const PsychologistDashboard = () => {
                           </span>
                         </div>
                         <div className="ml-3">
-                          <p className="font-medium text-gray-900">{patient.name}</p>
-                          <p className="text-sm text-gray-500">{patient.email}</p>
+                          <p className="font-medium text-gray-900">
+                            {patient.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {patient.email}
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-between items-center mt-3">
-                        <span className={`
+                        <span
+                          className={`
                           px-2 py-1 text-xs rounded-full
-                          ${patient.status === 'activo' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
+                          ${
+                            patient.status === "activo"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                           }
-                        `}>
+                        `}
+                        >
                           {patient.status}
                         </span>
-                        
+
                         <Button
                           onClick={() => navigate(`/pacientes/${patient.id}`)}
                           variant="ghost"
@@ -189,7 +246,7 @@ const PsychologistDashboard = () => {
               )}
             </Card.Content>
           </Card>
-          
+
           {/* Sección de chat */}
           <Card>
             <Card.Header>
@@ -202,8 +259,12 @@ const PsychologistDashboard = () => {
                     <FiMessageCircle size={24} className="text-indigo-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Mensajes de pacientes</h4>
-                    <p className="text-gray-500 text-sm">Mantén comunicación constante con tus pacientes</p>
+                    <h4 className="font-medium text-gray-900">
+                      Mensajes de pacientes
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      Mantén comunicación constante con tus pacientes
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -225,7 +286,7 @@ const PsychologistDashboard = () => {
             <Card.Content>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Gestión de Emociones */}
-                <div 
+                <div
                   onClick={() => navigate(ROUTE_PATHS.GESTION_EMOCIONES)}
                   className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                 >
@@ -233,13 +294,17 @@ const PsychologistDashboard = () => {
                     <div className="bg-red-100 p-2 rounded-lg mr-3">
                       <FiHeart size={20} className="text-red-600" />
                     </div>
-                    <h4 className="font-medium text-gray-900">Gestión de Emociones</h4>
+                    <h4 className="font-medium text-gray-900">
+                      Gestión de Emociones
+                    </h4>
                   </div>
-                  <p className="text-gray-600 text-sm">Registra y gestiona los estados emocionales de tus pacientes</p>
+                  <p className="text-gray-600 text-sm">
+                    Registra y gestiona los estados emocionales de tus pacientes
+                  </p>
                 </div>
 
                 {/* Estadísticas de Pacientes */}
-                <div 
+                <div
                   onClick={() => navigate(ROUTE_PATHS.ESTADISTICAS_PACIENTES)}
                   className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                 >
@@ -247,13 +312,17 @@ const PsychologistDashboard = () => {
                     <div className="bg-purple-100 p-2 rounded-lg mr-3">
                       <FiBarChart2 size={20} className="text-purple-600" />
                     </div>
-                    <h4 className="font-medium text-gray-900">Estadísticas de Pacientes</h4>
+                    <h4 className="font-medium text-gray-900">
+                      Estadísticas de Pacientes
+                    </h4>
                   </div>
-                  <p className="text-gray-600 text-sm">Analiza el progreso y estadísticas de todos tus pacientes</p>
+                  <p className="text-gray-600 text-sm">
+                    Analiza el progreso y estadísticas de todos tus pacientes
+                  </p>
                 </div>
 
                 {/* Gestión de Pacientes */}
-                <div 
+                <div
                   onClick={() => navigate(ROUTE_PATHS.PACIENTES)}
                   className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                 >
@@ -261,9 +330,13 @@ const PsychologistDashboard = () => {
                     <div className="bg-blue-100 p-2 rounded-lg mr-3">
                       <FiUsers size={20} className="text-blue-600" />
                     </div>
-                    <h4 className="font-medium text-gray-900">Gestión de Pacientes</h4>
+                    <h4 className="font-medium text-gray-900">
+                      Gestión de Pacientes
+                    </h4>
                   </div>
-                  <p className="text-gray-600 text-sm">Administra la información y seguimiento de tus pacientes</p>
+                  <p className="text-gray-600 text-sm">
+                    Administra la información y seguimiento de tus pacientes
+                  </p>
                 </div>
               </div>
             </Card.Content>

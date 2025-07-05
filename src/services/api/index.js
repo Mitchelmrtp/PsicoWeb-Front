@@ -7,6 +7,7 @@ import TestService from './testService';
 import { PatientService, PsychologistService } from './userService';
 import { SessionService, CalendarService, AvailabilityService } from './sessionService';
 import { ObjetivosService, EjerciciosService } from './objetivosService';
+import { registroEmocionService } from './registroEmocionService';
 
 // Instancias singleton de los servicios
 const authService = new AuthService();
@@ -32,6 +33,7 @@ export const createApiServices = () => ({
   availability: availabilityService,
   objetivos: objetivosService,
   ejercicios: ejerciciosService,
+  registroEmocion: registroEmocionService,
 });
 
 // Exportación directa para uso inmediato
@@ -49,6 +51,7 @@ export {
   AvailabilityService,
   ObjetivosService,
   EjerciciosService,
+  registroEmocionService,
   authService,
   profileService,
   testService,

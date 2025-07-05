@@ -32,6 +32,11 @@ const TestResultDetailContainer = lazy(() => import("../components/test/TestResu
 const ObjetivosPacienteContainer = lazy(() => import("../components/objetivos/ObjetivosPacienteContainer"));
 const MisObjetivosContainer = lazy(() => import("../components/objetivos/MisObjetivosContainer"));
 
+// Páginas de emociones
+const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage.jsx"));
+const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPage.jsx"));
+const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage.jsx"));
+
 // Componente de carga
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -211,6 +216,32 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MisObjetivosContainer />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de emociones */}
+        <Route
+          path={ROUTE_PATHS.GESTION_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <GestionEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.REGISTRAR_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <RegistrarEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <MisEmocionesPage />
             </ProtectedRoute>
           }
         />

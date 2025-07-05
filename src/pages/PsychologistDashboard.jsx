@@ -7,7 +7,7 @@ import AppointmentList from '../components/features/AppointmentList';
 import { Card, Button } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../routes/routePaths';
-import { FiMessageCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiHeart, FiBarChart2, FiUsers } from 'react-icons/fi';
 
 // Dashboard del psicólogo refactorizado
 const PsychologistDashboard = () => {
@@ -213,6 +213,58 @@ const PsychologistDashboard = () => {
                 >
                   Ver mensajes
                 </Button>
+              </div>
+            </Card.Content>
+          </Card>
+
+          {/* Herramientas de Gestión Emocional */}
+          <Card>
+            <Card.Header>
+              <Card.Title>Herramientas de Seguimiento Emocional</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Gestión de Emociones */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.GESTION_EMOCIONES)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-red-100 p-2 rounded-lg mr-3">
+                      <FiHeart size={20} className="text-red-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Gestión de Emociones</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Registra y gestiona los estados emocionales de tus pacientes</p>
+                </div>
+
+                {/* Estadísticas de Pacientes */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.ESTADISTICAS_PACIENTES)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                      <FiBarChart2 size={20} className="text-purple-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Estadísticas de Pacientes</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Analiza el progreso y estadísticas de todos tus pacientes</p>
+                </div>
+
+                {/* Gestión de Pacientes */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.PACIENTES)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                      <FiUsers size={20} className="text-blue-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Gestión de Pacientes</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Administra la información y seguimiento de tus pacientes</p>
+                </div>
               </div>
             </Card.Content>
           </Card>

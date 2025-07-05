@@ -84,7 +84,6 @@ class AuthService extends BaseApiService {
         user.role = user.rol || user.role;
       }
       
-      console.log('authService - Usuario almacenado recuperado:', user);
       return user;
     } catch (error) {
       console.error('Error parsing stored user:', error);
@@ -100,7 +99,6 @@ class AuthService extends BaseApiService {
         user.role = user.rol || user.role;
       }
       
-      console.log('authService - Guardando usuario normalizado:', user);
       localStorage.setItem('user', JSON.stringify(user));
     } else {
       localStorage.removeItem('user');

@@ -7,7 +7,7 @@ import PsychologistCard from '../components/features/PsychologistCard';
 import { Card, Button } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE_PATHS } from '../routes/routePaths';
-import { FiMessageCircle } from 'react-icons/fi';
+import { FiMessageCircle, FiHeart, FiBarChart2, FiTarget } from 'react-icons/fi';
 
 // Dashboard del paciente refactorizado siguiendo principios SOLID
 const PatientDashboard = () => {
@@ -133,6 +133,58 @@ const PatientDashboard = () => {
                 >
                   Ver mensajes
                 </Button>
+              </div>
+            </Card.Content>
+          </Card>
+
+          {/* Accesos rápidos a nuevas funcionalidades */}
+          <Card>
+            <Card.Header>
+              <Card.Title>Mi Progreso Terapéutico</Card.Title>
+            </Card.Header>
+            <Card.Content>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Progreso Emocional */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.MI_PROGRESO_EMOCIONAL)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-red-100 p-2 rounded-lg mr-3">
+                      <FiHeart size={20} className="text-red-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Progreso Emocional</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Visualiza tu evolución emocional a lo largo del tiempo</p>
+                </div>
+
+                {/* Mis Objetivos */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.MIS_OBJETIVOS)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-green-100 p-2 rounded-lg mr-3">
+                      <FiTarget size={20} className="text-green-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Mis Objetivos</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Revisa y actualiza tus metas terapéuticas</p>
+                </div>
+
+                {/* Mis Estadísticas */}
+                <div 
+                  onClick={() => navigate(ROUTE_PATHS.MIS_ESTADISTICAS)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                      <FiBarChart2 size={20} className="text-purple-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">Mis Estadísticas</h4>
+                  </div>
+                  <p className="text-gray-600 text-sm">Panel completo de tu progreso terapéutico</p>
+                </div>
               </div>
             </Card.Content>
           </Card>

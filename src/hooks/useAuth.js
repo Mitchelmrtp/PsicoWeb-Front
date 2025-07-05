@@ -34,7 +34,6 @@ export const useAuth = () => {
       role: authStore.user.rol || authStore.user.role
     };
     
-    console.log('useAuth - Usuario normalizado:', user);
     return user;
   }, [authStore.user?.id, authStore.user?.role, authStore.user?.rol, authStore.user?.email]);
 

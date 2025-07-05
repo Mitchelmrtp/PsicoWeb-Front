@@ -146,45 +146,7 @@ export const useObjetivos = (pacienteId = null) => {
   };
 };
 
-/**
- * Hook para gestión de un objetivo específico
- */
-export const useObjetivo = (objetivoId) => {
-  const [objetivo, setObjetivo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const loadObjetivo = useCallback(async () => {
-    if (!objetivoId) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await apiServices.objetivos.getObjetivoById(objetivoId);
-      
-      // Extract data from the response wrapper
-      const data = response?.data || response;
-      setObjetivo(data);
-    } catch (err) {
-      console.error('Error loading objetivo:', err);
-      setError(err.message || 'Error al cargar objetivo');
-    } finally {
-      setLoading(false);
-    }
-  }, [objetivoId]);
-
-  useEffect(() => {
-    loadObjetivo();
-  }, [loadObjetivo]);
-
-  return {
-    objetivo,
-    loading,
-    error,
-    loadObjetivo
-  };
-};
 
 /**
  * Hook para gestión de ejercicios
@@ -324,42 +286,4 @@ export const useEjercicios = (objetivoId = null, pacienteId = null) => {
   };
 };
 
-/**
- * Hook para obtener el progreso de ejercicios de un paciente
- */
-export const useProgresoEjercicios = (pacienteId = null) => {
-  const { user } = useAuth();
-  const [progreso, setProgreso] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const loadProgreso = useCallback(async () => {
-    const targetPacienteId = pacienteId || (user?.role === 'paciente' ? user.id : null);
-    
-    if (!targetPacienteId) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const data = await apiServices.ejercicios.getProgresoEjercicios(targetPacienteId);
-      setProgreso(data);
-    } catch (err) {
-      console.error('Error loading progreso ejercicios:', err);
-      setError(err.message || 'Error al cargar progreso de ejercicios');
-    } finally {
-      setLoading(false);
-    }
-  }, [pacienteId, user]);
-
-  useEffect(() => {
-    loadProgreso();
-  }, [loadProgreso]);
-
-  return {
-    progreso,
-    loading,
-    error,
-    loadProgreso
-  };
-};

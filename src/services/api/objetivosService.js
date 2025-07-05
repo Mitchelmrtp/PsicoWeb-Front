@@ -31,14 +31,7 @@ export class ObjetivosService extends BaseApiService {
     return this.get('/');
   }
 
-  /**
-   * Obtiene un objetivo específico por ID
-   * @param {string} objetivoId - ID del objetivo
-   * @returns {Promise<Object>} Datos del objetivo
-   */
-  async getObjetivoById(objetivoId) {
-    return this.get(`/${objetivoId}`);
-  }
+
 
   /**
    * Crea un nuevo objetivo
@@ -113,14 +106,7 @@ export class EjerciciosService extends BaseApiService {
     return this.get('/');
   }
 
-  /**
-   * Obtiene un ejercicio específico por ID
-   * @param {string} ejercicioId - ID del ejercicio
-   * @returns {Promise<Object>} Datos del ejercicio
-   */
-  async getEjercicioById(ejercicioId) {
-    return this.get(`/${ejercicioId}`);
-  }
+
 
   /**
    * Crea un nuevo ejercicio
@@ -193,14 +179,7 @@ export class EjerciciosService extends BaseApiService {
     });
   }
 
-  /**
-   * Obtiene el progreso general de ejercicios de un paciente
-   * @param {string} pacienteId - ID del paciente
-   * @returns {Promise<Object>} Estadísticas de progreso
-   */
-  async getProgresoEjercicios(pacienteId) {
-    return this.get(`/paciente/${pacienteId}/progreso`);
-  }
+
 }
 
 // Instancias singleton

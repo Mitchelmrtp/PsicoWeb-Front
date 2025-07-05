@@ -70,16 +70,10 @@ const GestionEmocionesPage = () => {
       if (dateFilter.desde) params.startDate = dateFilter.desde;
       if (dateFilter.hasta) params.endDate = dateFilter.hasta;
       
-      console.log('🚀 Frontend - Cargando emociones:');
-      console.log('  - pacienteId:', pacienteId);
-      console.log('  - params:', params);
-      
       const response = await registroEmocionService.getRegistros(params);
-      console.log('📨 Frontend - Respuesta recibida:', response);
       
       // La respuesta tiene la estructura: { success: true, data: { registros: [...], total: X } }
       const registrosData = response?.data?.registros || response?.registros || [];
-      console.log('📊 Frontend - Registros extraídos:', registrosData);
       
       // Procesar los registros para calcular campos necesarios
       const registrosProcesados = Array.isArray(registrosData) ? registrosData.map(registro => {
@@ -115,7 +109,6 @@ const GestionEmocionesPage = () => {
         };
       }) : [];
       
-      console.log('🔄 Frontend - Registros procesados:', registrosProcesados);
       setEmociones(registrosProcesados);
     } catch (err) {
       console.error('❌ Error al cargar emociones:', err);

@@ -4,9 +4,9 @@
  */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useRegistroEmociones } from '../../hooks/useRegistroEmociones';
 import { useAuth } from '../../hooks/useAuth';
 import { psychologistService } from '../../services/api';
+import { registroEmocionService } from '../../services/api/registroEmocionService';
 
 const RegistroEmocionForm = ({ 
   pacienteId,
@@ -16,8 +16,8 @@ const RegistroEmocionForm = ({
   onCancel,
   mostrarBotonesCancelar = false
 }) => {
-  const { createRegistro, loading } = useRegistroEmociones();
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     idPaciente: pacienteId || pacienteIdPreseleccionado || '',
@@ -151,19 +151,22 @@ const RegistroEmocionForm = ({
     }
 
     try {
+      setLoading(true);
       // Sanitize data before sending
       const submitData = {
         ...formData,
         idSesion: formData.idSesion || null // Convert empty string to null
       };
 
-      await createRegistro(submitData);
+      await registroEmocionService.createRegistro(submitData);
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       console.error('Error al guardar registro:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

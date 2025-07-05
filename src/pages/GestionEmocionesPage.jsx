@@ -70,9 +70,53 @@ const GestionEmocionesPage = () => {
       if (dateFilter.desde) params.startDate = dateFilter.desde;
       if (dateFilter.hasta) params.endDate = dateFilter.hasta;
       
-      const registros = await registroEmocionService.getRegistros(params);
-      const registrosData = registros.data || registros;
-      setEmociones(Array.isArray(registrosData) ? registrosData : []);
+      console.log('🚀 Frontend - Cargando emociones:');
+      console.log('  - pacienteId:', pacienteId);
+      console.log('  - params:', params);
+      
+      const response = await registroEmocionService.getRegistros(params);
+      console.log('📨 Frontend - Respuesta recibida:', response);
+      
+      // La respuesta tiene la estructura: { success: true, data: { registros: [...], total: X } }
+      const registrosData = response?.data?.registros || response?.registros || [];
+      console.log('📊 Frontend - Registros extraídos:', registrosData);
+      
+      // Procesar los registros para calcular campos necesarios
+      const registrosProcesados = Array.isArray(registrosData) ? registrosData.map(registro => {
+        // Calcular intensidad promedio desde el objeto emociones
+        let intensidadPromedio = 0;
+        let estadoGeneral = 'regular';
+        
+        if (registro.emociones && typeof registro.emociones === 'object') {
+          const valores = Object.values(registro.emociones);
+          if (valores.length > 0) {
+            intensidadPromedio = valores.reduce((sum, val) => sum + (Number(val) || 0), 0) / valores.length;
+            
+            // Determinar estado general basado en el promedio
+            if (intensidadPromedio >= 8) {
+              estadoGeneral = 'muy_bueno';
+            } else if (intensidadPromedio >= 6) {
+              estadoGeneral = 'bueno';
+            } else if (intensidadPromedio >= 4) {
+              estadoGeneral = 'regular';
+            } else if (intensidadPromedio >= 2) {
+              estadoGeneral = 'malo';
+            } else {
+              estadoGeneral = 'muy_malo';
+            }
+          }
+        }
+        
+        return {
+          ...registro,
+          intensidadPromedio: Number(intensidadPromedio) || 0,
+          estadoGeneral: registro.estadoGeneral || estadoGeneral,
+          comentarios: registro.comentarios || 'Sin comentarios'
+        };
+      }) : [];
+      
+      console.log('🔄 Frontend - Registros procesados:', registrosProcesados);
+      setEmociones(registrosProcesados);
     } catch (err) {
       console.error('❌ Error al cargar emociones:', err);
       setEmociones([]);
@@ -333,7 +377,7 @@ const GestionEmocionesPage = () => {
                         {Array.isArray(emociones) && emociones.map((registro) => (
                           <tr key={registro.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {registro.createdAt ? new Date(registro.createdAt).toLocaleDateString('es-ES', {
+                              {registro.fechaRegistro ? new Date(registro.fechaRegistro).toLocaleDateString('es-ES', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
@@ -341,9 +385,12 @@ const GestionEmocionesPage = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                registro.estadoGeneral === 'positivo' ? 'bg-green-100 text-green-800' :
-                                registro.estadoGeneral === 'negativo' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
+                                registro.estadoGeneral === 'muy_bueno' ? 'bg-green-100 text-green-800' :
+                                registro.estadoGeneral === 'bueno' ? 'bg-green-100 text-green-800' :
+                                registro.estadoGeneral === 'regular' ? 'bg-yellow-100 text-yellow-800' :
+                                registro.estadoGeneral === 'malo' ? 'bg-red-100 text-red-800' :
+                                registro.estadoGeneral === 'muy_malo' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
                               }`}>
                                 {registro.estadoGeneral || 'No especificado'}
                               </span>
@@ -353,10 +400,10 @@ const GestionEmocionesPage = () => {
                                 <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
                                   <div 
                                     className="bg-blue-600 h-2 rounded-full" 
-                                    style={{ width: `${(registro.intensidadPromedio / 10) * 100}%` }}
+                                    style={{ width: `${Math.min(100, Math.max(0, (Number(registro.intensidadPromedio) || 0) / 10 * 100))}%` }}
                                   ></div>
                                 </div>
-                                <span className="font-medium">{registro.intensidadPromedio?.toFixed(1) || '0.0'}/10</span>
+                                <span className="font-medium">{Number(registro.intensidadPromedio || 0).toFixed(1)}/10</span>
                               </div>
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500">
@@ -382,14 +429,14 @@ const GestionEmocionesPage = () => {
                   <div className="h-96">
                     <Line
                       data={{
-                        labels: emociones.map(r => r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', {
+                        labels: emociones.map(r => r.fechaRegistro ? new Date(r.fechaRegistro).toLocaleDateString('es-ES', {
                           month: 'short',
                           day: 'numeric'
                         }) : '-'),
                         datasets: [
                           {
                             label: 'Intensidad Promedio',
-                            data: emociones.map(r => r.intensidadPromedio),
+                            data: emociones.map(r => Number(r.intensidadPromedio) || 0),
                             fill: false,
                             borderColor: '#3b82f6',
                             backgroundColor: '#3b82f6',
@@ -451,13 +498,13 @@ const GestionEmocionesPage = () => {
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">
-                        {emociones.length > 0 ? (emociones.reduce((sum, r) => sum + (r.intensidadPromedio || 0), 0) / emociones.length).toFixed(1) : '0.0'}
+                        {emociones.length > 0 ? (emociones.reduce((sum, r) => sum + (Number(r.intensidadPromedio) || 0), 0) / emociones.length).toFixed(1) : '0.0'}
                       </div>
                       <div className="text-sm text-gray-600">Promedio General</div>
                     </div>
                     <div className="bg-purple-50 p-3 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
-                        {emociones.length > 0 ? Math.max(...emociones.map(r => r.intensidadPromedio || 0)).toFixed(1) : '0.0'}
+                        {emociones.length > 0 ? Math.max(...emociones.map(r => Number(r.intensidadPromedio) || 0)).toFixed(1) : '0.0'}
                       </div>
                       <div className="text-sm text-gray-600">Mejor Registro</div>
                     </div>

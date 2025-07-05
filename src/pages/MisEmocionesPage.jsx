@@ -44,9 +44,53 @@ const MisEmocionesPage = () => {
       if (dateFilter.desde) params.fechaDesde = dateFilter.desde;
       if (dateFilter.hasta) params.fechaHasta = dateFilter.hasta;
       
-      const registros = await registroEmocionService.getRegistros(params);
-      const registrosData = registros.data || registros;
-      setEmociones(Array.isArray(registrosData) ? registrosData : []);
+      console.log('🚀 Frontend Paciente - Cargando emociones:');
+      console.log('  - pacienteId:', user.id);
+      console.log('  - params:', params);
+      
+      const response = await registroEmocionService.getRegistros(params);
+      console.log('📨 Frontend Paciente - Respuesta recibida:', response);
+      
+      // La respuesta tiene la estructura: { success: true, data: { registros: [...], total: X } }
+      const registrosData = response?.data?.registros || response?.registros || [];
+      console.log('📊 Frontend Paciente - Registros extraídos:', registrosData);
+      
+      // Procesar los registros para calcular campos necesarios
+      const registrosProcesados = Array.isArray(registrosData) ? registrosData.map(registro => {
+        // Calcular intensidad promedio desde el objeto emociones
+        let intensidadPromedio = 0;
+        let estadoGeneral = 'regular';
+        
+        if (registro.emociones && typeof registro.emociones === 'object') {
+          const valores = Object.values(registro.emociones);
+          if (valores.length > 0) {
+            intensidadPromedio = valores.reduce((sum, val) => sum + (Number(val) || 0), 0) / valores.length;
+            
+            // Determinar estado general basado en el promedio
+            if (intensidadPromedio >= 8) {
+              estadoGeneral = 'muy_bueno';
+            } else if (intensidadPromedio >= 6) {
+              estadoGeneral = 'bueno';
+            } else if (intensidadPromedio >= 4) {
+              estadoGeneral = 'regular';
+            } else if (intensidadPromedio >= 2) {
+              estadoGeneral = 'malo';
+            } else {
+              estadoGeneral = 'muy_malo';
+            }
+          }
+        }
+        
+        return {
+          ...registro,
+          intensidadPromedio: Number(intensidadPromedio) || 0,
+          estadoGeneral: registro.estadoGeneral || estadoGeneral,
+          comentarios: registro.comentarios || 'Sin comentarios'
+        };
+      }) : [];
+      
+      console.log('🔄 Frontend Paciente - Registros procesados:', registrosProcesados);
+      setEmociones(registrosProcesados);
     } catch (err) {
       console.error('Error al cargar mis emociones:', err);
       setEmociones([]);
@@ -144,7 +188,7 @@ const MisEmocionesPage = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
-                      {(emociones.reduce((sum, r) => sum + (r.intensidadPromedio || 0), 0) / emociones.length).toFixed(1)}
+                      {emociones.length > 0 ? (emociones.reduce((sum, r) => sum + (Number(r.intensidadPromedio) || 0), 0) / emociones.length).toFixed(1) : '0.0'}
                     </p>
                     <p className="text-sm text-gray-600">Promedio General</p>
                   </div>
@@ -160,7 +204,7 @@ const MisEmocionesPage = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
-                      {Math.max(...emociones.map(r => r.intensidadPromedio || 0)).toFixed(1)}
+                      {emociones.length > 0 ? Math.max(...emociones.map(r => Number(r.intensidadPromedio) || 0)).toFixed(1) : '0.0'}
                     </p>
                     <p className="text-sm text-gray-600">Mejor Registro</p>
                   </div>
@@ -176,7 +220,7 @@ const MisEmocionesPage = () => {
                   </div>
                   <div className="ml-4">
                     <p className="text-2xl font-bold text-gray-900">
-                      {emociones.length > 0 ? Math.floor((Date.now() - new Date(emociones[0]?.createdAt)) / (1000 * 60 * 60 * 24)) : 0}
+                      {emociones.length > 0 ? Math.floor((Date.now() - new Date(emociones[0]?.fechaRegistro)) / (1000 * 60 * 60 * 24)) : 0}
                     </p>
                     <p className="text-sm text-gray-600">Días Registrando</p>
                   </div>
@@ -210,14 +254,14 @@ const MisEmocionesPage = () => {
               <div className="h-96">
                 <Line
                   data={{
-                    labels: emociones.map(r => r.createdAt ? new Date(r.createdAt).toLocaleDateString('es-ES', {
+                    labels: emociones.map(r => r.fechaRegistro ? new Date(r.fechaRegistro).toLocaleDateString('es-ES', {
                       month: 'short',
                       day: 'numeric'
                     }) : '-'),
                     datasets: [
                       {
                         label: 'Mi Intensidad Emocional',
-                        data: emociones.map(r => r.intensidadPromedio),
+                        data: emociones.map(r => Number(r.intensidadPromedio) || 0),
                         fill: false,
                         borderColor: '#10b981',
                         backgroundColor: '#10b981',
@@ -296,7 +340,7 @@ const MisEmocionesPage = () => {
                     {emociones.map((registro) => (
                       <tr key={registro.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {registro.createdAt ? new Date(registro.createdAt).toLocaleDateString('es-ES', {
+                          {registro.fechaRegistro ? new Date(registro.fechaRegistro).toLocaleDateString('es-ES', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
@@ -316,10 +360,10 @@ const MisEmocionesPage = () => {
                             <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2 max-w-[80px]">
                               <div 
                                 className="bg-green-600 h-2 rounded-full" 
-                                style={{ width: `${(registro.intensidadPromedio / 10) * 100}%` }}
+                                style={{ width: `${Math.min(100, Math.max(0, (Number(registro.intensidadPromedio) || 0) / 10 * 100))}%` }}
                               ></div>
                             </div>
-                            <span className="font-medium">{registro.intensidadPromedio?.toFixed(1) || '0.0'}/10</span>
+                            <span className="font-medium">{Number(registro.intensidadPromedio || 0).toFixed(1)}/10</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">

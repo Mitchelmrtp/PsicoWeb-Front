@@ -3,7 +3,9 @@ import StepDisponibilidad from "../Calendario/StepDisponibilidad";
 import { useNavigate } from "react-router-dom";
 import StepDatosPago from "../auth/StepDatosPagos";
 import SidebarManager from "../dashboard/SidebarManager";
+import PaymentReceipt from "../payment/PaymentReceipt";
 import { useAuth } from "../../hooks/useAuth";
+import { usePagos } from "../../hooks/usePagos";
 import { toast } from "react-toastify";
 import { ENDPOINTS, getAuthHeader } from "../../config/api";
 
@@ -13,8 +15,19 @@ const ReservaCita = () => {
   const [loading, setLoading] = useState(false);
   const [psicologos, setPsicologos] = useState([]);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [pagoData, setPagoData] = useState(null);
+  const [comprobanteData, setComprobanteData] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('tarjeta');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { 
+    procesarPago, 
+    procesarPagoConSesion,
+    verificarEstado, 
+    confirmarPago, 
+    generarComprobante,
+    loading: pagoLoading 
+  } = usePagos();
 
   // Fetch psychologists when component mounts
   useEffect(() => {
@@ -122,8 +135,8 @@ const ReservaCita = () => {
     }
   };
 
-  // Handle final confirmation and create session in backend
-  const handleConfirm = async () => {
+  // Handle final confirmation and create session in backend with payment integration
+  const handleConfirm = async (paymentMethod = selectedPaymentMethod) => {
     try {
       // Validate user
       const userId = user?.userId || user?.id;
@@ -168,32 +181,82 @@ const ReservaCita = () => {
       // Format the date as YYYY-MM-DD
       const fecha = reservaData.date.toISOString().split('T')[0];
 
-      // Prepare session data for backend - removed notas field
-      const sessionData = {
+      // Prepare data for payment and session creation
+      const requestData = {
+        // Payment data
+        monto: 50.00,
+        montoImpuestos: 5.00,
+        montoTotal: 55.00,
+        metodoPago: paymentMethod,
+        descripcion: `Sesión con ${reservaData.psicologoNombre} - ${fecha} ${reservaData.time}`,
+        // Session data
         idPsicologo: reservaData.psicologoId,
-        idPaciente: userId,
         fecha: fecha,
         horaInicio: horaInicio,
-        horaFin: horaFin,
-        estado: "programada"
-        // notas field has been removed
+        horaFin: horaFin
       };
 
-      // Debug: Log the session data being sent
-      // Session data being sent
-
-      // Send to backend
-      await createSesion(sessionData);
+      console.log('Enviando datos para pago y sesión:', requestData);
+      toast.info("Procesando pago y creando cita...");
       
-      setBookingSuccess(true);
-      toast.success("¡Cita reservada exitosamente!");
+      // Process payment and create session in one transaction
+      const resultado = await procesarPagoConSesion(requestData);
+      console.log('Resultado completo:', resultado);
 
-      // Wait 2 seconds before redirecting to dashboard
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      // Check if payment was processed successfully
+      // For cash and transfer payments, they start as 'pendiente' and that's acceptable
+      // For card and PayPal, they should be 'completado'
+      const paymentSuccess = (
+        resultado.pago && (
+          resultado.pago.estado === 'completado' || 
+          resultado.pago.estado === 'procesado' || 
+          resultado.pago.estado === 'confirmado' ||
+          (resultado.pago.estado === 'pendiente' && ['efectivo', 'transferencia'].includes(resultado.pago.metodoPago))
+        )
+      );
+
+      if (paymentSuccess) {
+        setPagoData(resultado.pago);
+
+        // Generate receipt
+        try {
+          const comprobante = await generarComprobante(resultado.pago.id);
+          setComprobanteData(comprobante);
+        } catch (comprob_error) {
+          console.warn('No se pudo generar el comprobante, pero el pago fue exitoso:', comprob_error);
+        }
+        
+        setBookingSuccess(true);
+        
+        // Different success messages based on payment method
+        if (resultado.pago.metodoPago === 'efectivo') {
+          toast.success("¡Cita reservada! El pago en efectivo se confirmará en el consultorio.");
+        } else if (resultado.pago.metodoPago === 'transferencia') {
+          toast.success("¡Cita reservada! El pago por transferencia se confirmará cuando se reciba.");
+        } else {
+          toast.success("¡Cita reservada y pago procesado exitosamente!");
+        }
+
+        // Wait 3 seconds before redirecting to dashboard
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 3000);
+      } else {
+        const estado = resultado.pago?.estado || 'desconocido';
+        toast.error(`Error en el procesamiento del pago: ${estado}. Por favor, inténtelo de nuevo.`);
+      }
+      
     } catch (error) {
-      toast.error(`Error al reservar la cita: ${error.message}`);
+      console.error("Error in booking confirmation:", error);
+      
+      // More specific error handling
+      if (error.message.includes('pago') || error.message.includes('payment')) {
+        toast.error(`Error en el pago: ${error.message}`);
+      } else if (error.message.includes('sesión') || error.message.includes('session')) {
+        toast.error(`Error al crear la cita: ${error.message}`);
+      } else {
+        toast.error(`Error al procesar la solicitud: ${error.message}`);
+      }
     }
   };
 
@@ -208,15 +271,36 @@ const ReservaCita = () => {
           </h1>
 
           {bookingSuccess ? (
-            <div className="bg-white p-8 rounded-xl shadow-md text-center">
-              <div className="text-green-500 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div className="bg-white p-8 rounded-xl shadow-md">
+              <div className="text-center mb-6">
+                <div className="text-green-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold mb-2 text-gray-800">¡Cita Reservada y Pago Procesado!</h2>
+                <p className="text-gray-600 mb-6">
+                  Su cita ha sido programada exitosamente
+                </p>
               </div>
-              <h2 className="text-2xl font-bold mb-2">¡Cita Reservada Exitosamente!</h2>
-              <p className="mb-6">Su cita ha sido programada con {reservaData.psicologoNombre} para el {reservaData.date?.toLocaleDateString()} a las {reservaData.time}</p>
-              <p className="text-sm text-gray-500">Redirigiendo al panel principal...</p>
+
+              <PaymentReceipt 
+                pagoData={pagoData}
+                comprobanteData={comprobanteData}
+                citaData={reservaData}
+              />
+              
+              <div className="text-center mt-6">
+                <p className="text-sm text-gray-500">Redirigiendo al panel principal...</p>
+                <div className="mt-4">
+                  <button 
+                    onClick={() => navigate("/dashboard")}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    Ir al Dashboard
+                  </button>
+                </div>
+              </div>
             </div>
           ) : step === 1 ? (
             <StepDisponibilidad
@@ -231,7 +315,8 @@ const ReservaCita = () => {
               citaData={reservaData}
               onBack={() => setStep(1)}
               onConfirm={handleConfirm}
-              isLoading={loading}
+              loading={loading || pagoLoading}
+              onPaymentMethodChange={setSelectedPaymentMethod}
             />
           )}
         </div>

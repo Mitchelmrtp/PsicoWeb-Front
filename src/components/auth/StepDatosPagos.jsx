@@ -3,7 +3,7 @@ import Button from "../ui/Button";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
+const StepDatosPago = ({ citaData, onBack, onConfirm, loading, onPaymentMethodChange }) => {
   const [paymentMethod, setPaymentMethod] = useState("tarjeta");
   
   const formatDate = (date) => {
@@ -11,10 +11,17 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
     return format(new Date(date), 'EEEE d MMMM yyyy', { locale: es });
   };
 
-  // Handle submission - payment info is collected but not sent to backend yet
+  // Handle payment method change
+  const handlePaymentMethodChange = (method) => {
+    setPaymentMethod(method);
+    if (onPaymentMethodChange) {
+      onPaymentMethodChange(method);
+    }
+  };
+
+  // Handle submission with payment method
   const handleSubmit = () => {
-    // We're proceeding without sending payment info to backend
-    onConfirm();
+    onConfirm(paymentMethod);
   };
 
   return (
@@ -47,14 +54,14 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
             )}
           </div>
           
-          <h3 className="font-medium text-lg mb-4">Método de Pago <span className="text-xs text-gray-500">(Para implementación futura)</span></h3>
+          <h3 className="font-medium text-lg mb-4">Método de Pago</h3>
           
           <div className="space-y-3">
-            <div onClick={() => setPaymentMethod("tarjeta")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'tarjeta' ? 'border-blue-500' : 'border-gray-300'}`}>
+            <div onClick={() => handlePaymentMethodChange("tarjeta")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'tarjeta' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
               <input
                 type="radio"
                 checked={paymentMethod === "tarjeta"}
-                onChange={() => setPaymentMethod("tarjeta")}
+                onChange={() => handlePaymentMethodChange("tarjeta")}
                 className="mr-3"
               />
               <div>
@@ -63,11 +70,11 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
               </div>
             </div>
             
-            <div onClick={() => setPaymentMethod("paypal")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'paypal' ? 'border-blue-500' : 'border-gray-300'}`}>
+            <div onClick={() => handlePaymentMethodChange("paypal")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
               <input
                 type="radio"
                 checked={paymentMethod === "paypal"}
-                onChange={() => setPaymentMethod("paypal")}
+                onChange={() => handlePaymentMethodChange("paypal")}
                 className="mr-3"
               />
               <div>
@@ -76,11 +83,11 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
               </div>
             </div>
             
-            <div onClick={() => setPaymentMethod("efectivo")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'efectivo' ? 'border-blue-500' : 'border-gray-300'}`}>
+            <div onClick={() => handlePaymentMethodChange("efectivo")} className={`border rounded-lg p-3 flex items-center cursor-pointer ${paymentMethod === 'efectivo' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
               <input
                 type="radio"
                 checked={paymentMethod === "efectivo"}
-                onChange={() => setPaymentMethod("efectivo")}
+                onChange={() => handlePaymentMethodChange("efectivo")}
                 className="mr-3"
               />
               <div>
@@ -90,9 +97,9 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
             </div>
           </div>
           
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-700">
-              <span className="font-medium">Nota:</span> El sistema de pagos está siendo implementado. Por el momento, las citas se agendarán sin procesar el pago.
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-700">
+              <span className="font-medium">✓ Sistema de pagos integrado:</span> El pago se procesará de forma segura al confirmar la reserva.
             </p>
           </div>
         </div>
@@ -149,7 +156,7 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading }) => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? 'Procesando...' : 'Confirmar Reserva'}
+          {loading ? 'Procesando pago...' : 'Confirmar y Pagar'}
         </Button>
       </div>
     </div>

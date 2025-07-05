@@ -37,6 +37,9 @@ const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage.js
 const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPage.jsx"));
 const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage.jsx"));
 
+// Demo components (temporary)
+const PaymentReceiptDemo = lazy(() => import("../components/payment/PaymentReceiptDemo.jsx"));
+
 // Componente de carga
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -81,6 +84,9 @@ const AppRoutes = () => {
         <Route path={ROUTE_PATHS.HOME} element={<MainPage />} />
         <Route path={ROUTE_PATHS.MAIN_PAGE} element={<MainPage />} />
         <Route path={ROUTE_PATHS.SEARCH} element={<SearchPage />} />
+        
+        {/* Demo temporal - PDF Receipt */}
+        <Route path="/pdf-demo" element={<PaymentReceiptDemo />} />
         
         {/* Rutas de autenticación */}
         <Route

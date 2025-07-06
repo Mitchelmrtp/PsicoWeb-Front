@@ -322,9 +322,31 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
     }
     
     if (selectedDate && selectedTime) {
+      // Get the psychologist name properly from the data structure
+      let psicologoName = 'Psicólogo';
+      if (psicologoData) {
+        if (psicologoData.User) {
+          if (psicologoData.User.name) {
+            psicologoName = psicologoData.User.name;
+          } else if (psicologoData.User.first_name || psicologoData.User.last_name) {
+            const firstName = psicologoData.User.first_name || '';
+            const lastName = psicologoData.User.last_name || '';
+            psicologoName = `${firstName} ${lastName}`.trim();
+          }
+        } else if (psicologoData.first_name || psicologoData.last_name) {
+          const firstName = psicologoData.first_name || '';
+          const lastName = psicologoData.last_name || '';
+          psicologoName = `${firstName} ${lastName}`.trim();
+        } else if (psicologoData.name) {
+          psicologoName = psicologoData.name;
+        } else if (psicologoData.displayName) {
+          psicologoName = psicologoData.displayName.replace('Psic. ', '');
+        }
+      }
+      
       onNext({
         psicologoId: selectedPsicologo,
-        psicologoNombre: psicologoData ? `${psicologoData.first_name} ${psicologoData.last_name}` : '',
+        psicologoNombre: psicologoName,
         date: selectedDate,
         time: selectedTime,
         descripcion,

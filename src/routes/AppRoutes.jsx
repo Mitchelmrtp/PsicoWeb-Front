@@ -31,6 +31,7 @@ const ChatPage = lazy(() => import("../pages/ChatPage"));
 const MostrarInformes = lazy(() => import("../components/informes/MostrarInformes"));
 const GenerarInforme = lazy(() => import("../components/informes/GenerarInforme"));
 
+
 // Componente de carga
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -55,7 +56,7 @@ const AppRoutes = () => {
         <Route path={ROUTE_PATHS.HOME} element={<MainPage />} />
         <Route path={ROUTE_PATHS.MAIN_PAGE} element={<MainPage />} />
         <Route path={ROUTE_PATHS.SEARCH} element={<SearchPage />} />
-
+        
         {/* Rutas de autenticación */}
         <Route path={ROUTE_PATHS.LOGIN} element={<LoginForm />} />
         <Route path={ROUTE_PATHS.REGISTER} element={<RegisterForm />} />

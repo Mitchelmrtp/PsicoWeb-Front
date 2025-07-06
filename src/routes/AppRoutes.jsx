@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ROUTE_PATHS } from "./routePaths";
@@ -24,18 +26,10 @@ const MisConsultas = lazy(() => import("../pages/MisConsultas"));
 const PacientesPage = lazy(() => import("../pages/PacientesPage"));
 const TestManagement = lazy(() => import("../components/test/TestManagement"));
 const ChatPage = lazy(() => import("../pages/ChatPage"));
-// Nuevos componentes refactorizados con Container/Presenter pattern
-const PatientTestViewContainer = lazy(() => import("../components/test/PatientTestViewContainer"));
-const TestPageContainer = lazy(() => import("../components/test/TestPageContainer"));
-const TestResultDetailContainer = lazy(() => import("../components/test/TestResultDetailContainer"));
-// Componentes de objetivos
-const ObjetivosPacienteContainer = lazy(() => import("../components/objetivos/ObjetivosPacienteContainer"));
-const MisObjetivosContainer = lazy(() => import("../components/objetivos/MisObjetivosContainer"));
 
-// Páginas de emociones
-const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage.jsx"));
-const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPage.jsx"));
-const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage.jsx"));
+// Nuevos componentes de informes
+const MostrarInformes = lazy(() => import("../components/informes/MostrarInformes"));
+const GenerarInforme = lazy(() => import("../components/informes/GenerarInforme"));
 
 // Componente de carga
 const LoadingSpinner = () => (
@@ -51,26 +45,6 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Componente para rutas públicas (solo usuarios no autenticados)
-const PublicRoute = ({ children }) => {
-  const { user } = useAuth();
-  if (user) return <Navigate to={ROUTE_PATHS.DASHBOARD} />;
-  return children;
-};
-
-// Placeholder para funcionalidades en desarrollo
-const ComingSoonPage = ({ title, description }) => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">{title}</h2>
-      <p className="text-gray-600 mb-4">{description}</p>
-      <p className="text-sm text-gray-500">
-        Esta funcionalidad está en desarrollo.
-      </p>
-    </div>
-  </div>
-);
-
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -81,24 +55,10 @@ const AppRoutes = () => {
         <Route path={ROUTE_PATHS.HOME} element={<MainPage />} />
         <Route path={ROUTE_PATHS.MAIN_PAGE} element={<MainPage />} />
         <Route path={ROUTE_PATHS.SEARCH} element={<SearchPage />} />
-        
+
         {/* Rutas de autenticación */}
-        <Route
-          path={ROUTE_PATHS.LOGIN}
-          element={
-            <PublicRoute>
-              <LoginForm />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.REGISTER}
-          element={
-            <PublicRoute>
-              <RegisterForm />
-            </PublicRoute>
-          }
-        />
+        <Route path={ROUTE_PATHS.LOGIN} element={<LoginForm />} />
+        <Route path={ROUTE_PATHS.REGISTER} element={<RegisterForm />} />
         <Route path={ROUTE_PATHS.FORGOT_PASSWORD} element={<ForgotPassword />} />
         <Route path={ROUTE_PATHS.RESET_PASSWORD} element={<ResetPassword />} />
 
@@ -108,6 +68,24 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <DashboardContainer />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de informes */}
+        <Route
+          path={ROUTE_PATHS.GENERAR_INFORME}
+          element={
+            <ProtectedRoute>
+              <GenerarInforme />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MOSTRAR_INFORME}
+          element={
+            <ProtectedRoute>
+              <MostrarInformes />
             </ProtectedRoute>
           }
         />
@@ -135,19 +113,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.CHAT}
           element={
             <ProtectedRoute>
-              <Suspense fallback={<LoadingSpinner />}>
-                <ChatPage />
-              </Suspense>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.CHAT_DETAIL}
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<LoadingSpinner />}>
-                <ChatPage />
-              </Suspense>
+              <ChatPage />
             </ProtectedRoute>
           }
         />
@@ -173,7 +139,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.TEST_MENU}
           element={
             <ProtectedRoute>
-              {user?.role === 'psicologo' ? <TestManagement /> : <PatientTestViewContainer />}
+              {user?.role === 'psicologo' ? <TestManagement /> : <TestManagement />}
             </ProtectedRoute>
           }
         />
@@ -181,7 +147,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.TEST_PAGE}
           element={
             <ProtectedRoute>
-              <TestPageContainer />
+              <TestManagement />
             </ProtectedRoute>
           }
         />
@@ -189,59 +155,7 @@ const AppRoutes = () => {
           path={ROUTE_PATHS.RESULTADO}
           element={
             <ProtectedRoute>
-              <TestResultDetailContainer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.RESULTADO_PLURAL}
-          element={
-            <ProtectedRoute>
-              <TestResultDetailContainer />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Rutas de objetivos */}
-        <Route
-          path={ROUTE_PATHS.OBJETIVOS_PACIENTE}
-          element={
-            <ProtectedRoute>
-              <ObjetivosPacienteContainer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.MIS_OBJETIVOS}
-          element={
-            <ProtectedRoute>
-              <MisObjetivosContainer />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Rutas de emociones */}
-        <Route
-          path={ROUTE_PATHS.GESTION_EMOCIONES}
-          element={
-            <ProtectedRoute>
-              <GestionEmocionesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.REGISTRAR_EMOCIONES}
-          element={
-            <ProtectedRoute>
-              <RegistrarEmocionesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.MIS_EMOCIONES}
-          element={
-            <ProtectedRoute>
-              <MisEmocionesPage />
+              <TestManagement />
             </ProtectedRoute>
           }
         />
@@ -256,31 +170,7 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path={ROUTE_PATHS.PERFIL_PACIENTE_ALT}
-          element={
-            <ProtectedRoute>
-              <PerfilPaciente />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.PERFIL_PACIENTE_ID}
-          element={
-            <ProtectedRoute>
-              <PerfilPaciente />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path={ROUTE_PATHS.PERFIL_PSICOLOGO}
-          element={
-            <ProtectedRoute>
-              <PerfilPsicologo />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTE_PATHS.PERFIL_PSICOLOGO_ALT}
           element={
             <ProtectedRoute>
               <PerfilPsicologo />
@@ -304,62 +194,6 @@ const AppRoutes = () => {
               <PacientesPage />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path={ROUTE_PATHS.PACIENTE_DETAIL}
-          element={
-            <ProtectedRoute>
-              <PerfilPaciente />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Rutas en desarrollo */}
-        <Route 
-          path={ROUTE_PATHS.HELP}
-          element={
-            <ProtectedRoute>
-              <ComingSoonPage 
-                title="Centro de Ayuda"
-                description="Bienvenido al centro de ayuda de PsicoWeb. Aquí encontrarás recursos para usar la plataforma."
-              />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path={ROUTE_PATHS.CALENDARIO}
-          element={
-            <ProtectedRoute>
-              <ComingSoonPage 
-                title="Calendario"
-                description="Gestión de citas y disponibilidad."
-              />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path={ROUTE_PATHS.CONSULTAS_ONLINE}
-          element={
-            <ProtectedRoute>
-              <ComingSoonPage 
-                title="Consultas Online"
-                description="Acceso a consultas virtuales y sesiones en línea."
-              />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Ruta temporal para compatibilidad */}
-        <Route 
-          path="/tests/:testId/preguntas/:preguntaId/opciones" 
-          element={
-            <ProtectedRoute>
-              <ComingSoonPage 
-                title="Configuración de Opciones"
-                description="Gestión de opciones de preguntas de pruebas."
-              />
-            </ProtectedRoute>
-          } 
         />
       </Routes>
     </Suspense>

@@ -57,6 +57,8 @@ export const ROUTE_PATHS = {
   GESTION_EMOCIONES: "/gestion-emociones",
   REGISTRAR_EMOCIONES: "/registrar-emociones/:pacienteId",
   MIS_EMOCIONES: "/mis-emociones",
+  GENERAR_INFORME: "/generarinforme",
+  MOSTRAR_INFORME: "/mostrar-informe"
 };
 
 // Generadores de rutas dinámicas
@@ -101,6 +103,7 @@ export const NAVIGATION_ROUTES = {
     { path: ROUTE_PATHS.CHAT, label: "Mensajes", icon: "chat" },
     { path: ROUTE_PATHS.CONSULTAS_ONLINE, label: "Consultas Online", icon: "online" },
     { path: ROUTE_PATHS.TEST_MENU, label: "Gestión de Pruebas", icon: "test" },
+    { path: ROUTE_PATHS.MOSTRAR_INFORME, label: "Mostrar Informe", icon: "consultation" },
     { path: ROUTE_PATHS.PERFIL_PSICOLOGO, label: "Perfil", icon: "profile" },
     { path: ROUTE_PATHS.HELP, label: "Ayuda", icon: "help" },
   ],

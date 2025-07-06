@@ -31,6 +31,8 @@ export const ENDPOINTS = {
   EJERCICIOS: `${API_URL}/ejercicios`,
   // Endpoint para registros de emociones
   EMOCIONES: `${API_URL}/emociones`,
+  // Endpoints para informes
+  INFORMES: `${API_URL}/informes`,
 };
 
 export const getAuthHeader = () => {

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

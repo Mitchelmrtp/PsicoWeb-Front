@@ -109,6 +109,8 @@ const PsicologoSidebar = () => {
       ),
       action: () => navigate("/consultas"),
     },
+
+
     {
       path: "/consultas-online",
       label: "Consultas Online",

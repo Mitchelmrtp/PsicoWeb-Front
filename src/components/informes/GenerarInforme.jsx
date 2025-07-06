@@ -5,7 +5,7 @@ import NavigationSidebar from "../layout/NavigationSidebar"; // Sidebar
 import { ENDPOINTS, getAuthHeader } from "../../config/api";
 import { jsPDF } from "jspdf"; // Importar jsPDF
 
-const GenerarInforme = ({ onSubmit }) => {
+const GenerarInforme = ({ onSubmit = null }) => {
   const [horaInicio, setHoraInicio] = useState("");
   const [horaFin, setHoraFin] = useState("");
   const [nombrePaciente, setNombrePaciente] = useState("");
@@ -23,6 +23,12 @@ const GenerarInforme = ({ onSubmit }) => {
     // Validación de campos
     if (!nombrePaciente.trim() || !nombrePsicologo.trim()) {
       toast.error("Debe completar todos los campos requeridos");
+      return;
+    }
+
+    // Validación adicional para horarios
+    if (horaInicio && horaFin && horaInicio >= horaFin) {
+      toast.error("La hora de inicio debe ser anterior a la hora de fin");
       return;
     }
 
@@ -53,7 +59,18 @@ const GenerarInforme = ({ onSubmit }) => {
 
       if (response.ok) {
         toast.success("Informe creado correctamente");
-        onSubmit(result.data); // Llamamos al onSubmit para pasar los datos al componente principal
+        if (onSubmit && typeof onSubmit === 'function') {
+          onSubmit(result.data); // Llamamos al onSubmit para pasar los datos al componente principal
+        }
+        // Reset form after successful submission
+        setNombrePaciente("");
+        setNombrePsicologo("");
+        setHoraInicio("");
+        setHoraFin("");
+        setObjetivoSesion("");
+        setComentarioSesion("");
+        setMotivo("");
+        setFechaSesion(new Date());
       } else {
         toast.error(result.message || "Error al crear el informe");
       }

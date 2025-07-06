@@ -31,6 +31,12 @@ const ChatPage = lazy(() => import("../pages/ChatPage"));
 const MostrarInformes = lazy(() => import("../components/informes/MostrarInformes"));
 const GenerarInforme = lazy(() => import("../components/informes/GenerarInforme"));
 
+// Componentes de objetivos y emociones
+const ObjetivosPacienteContainer = lazy(() => import("../components/objetivos/ObjetivosPacienteContainer"));
+const MisObjetivosContainer = lazy(() => import("../components/objetivos/MisObjetivosContainer"));
+const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPage"));
+const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage"));
+const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage"));
 
 // Componente de carga
 const LoadingSpinner = () => (
@@ -118,6 +124,14 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTE_PATHS.CHAT_DETAIL}
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas de pruebas psicológicas */}
         <Route
@@ -193,6 +207,48 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <PacientesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de objetivos y emociones */}
+        <Route
+          path={ROUTE_PATHS.OBJETIVOS_PACIENTE}
+          element={
+            <ProtectedRoute>
+              <ObjetivosPacienteContainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_OBJETIVOS}
+          element={
+            <ProtectedRoute>
+              <MisObjetivosContainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.REGISTRAR_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <RegistrarEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <MisEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.GESTION_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <GestionEmocionesPage />
             </ProtectedRoute>
           }
         />

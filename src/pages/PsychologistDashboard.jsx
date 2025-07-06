@@ -45,20 +45,6 @@ const PsychologistDashboard = () => {
     { id: "canceladas", label: "Canceladas", count: 0 },
   ];
 
-  const handleRegisterAttendance = async (appointmentId) => {
-    try {
-      await fetch(`/api/sesiones/${appointmentId}/asistencia`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      alert("Asistencia registrada exitosamente.");
-    } catch (err) {
-      console.error("Error al registrar asistencia:", err);
-      alert("Hubo un error al registrar la asistencia.");
-    }
-  };
-
   return (
     <div className="flex h-screen bg-gray-50">
       <NavigationSidebar />
@@ -138,7 +124,6 @@ const PsychologistDashboard = () => {
                 emptyMessage="No hay citas en esta categoría"
                 onViewDetails={handleViewAppointment}
                 showViewAll={false}
-                onRegisterAttendance={handleRegisterAttendance}
               />
             </Card.Content>
           </Card>

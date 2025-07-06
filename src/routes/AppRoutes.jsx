@@ -38,6 +38,15 @@ const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPag
 const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage"));
 const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage"));
 
+// Componentes de citas
+const CitaDetailPage = lazy(() => import("../pages/CitaDetailPage"));
+
+// Componente temporal para consultas online
+const ConsultasOnlinePage = lazy(() => import("../pages/ConsultasOnlinePage"));
+
+// Componente de ayuda
+const HelpPage = lazy(() => import("../pages/HelpPage"));
+
 // Componente de carga
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -210,6 +219,42 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTE_PATHS.PACIENTE_DETAIL}
+          element={
+            <ProtectedRoute>
+              <PerfilPaciente />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de citas y sesiones */}
+        <Route
+          path={ROUTE_PATHS.CITA_DETAIL}
+          element={
+            <ProtectedRoute>
+              <CitaDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Ruta para consultas online */}
+        <Route
+          path={ROUTE_PATHS.CONSULTAS_ONLINE}
+          element={
+            <ProtectedRoute>
+              <ConsultasOnlinePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/consultas-online/:id"
+          element={
+            <ProtectedRoute>
+              <ConsultasOnlinePage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas de objetivos y emociones */}
         <Route
@@ -249,6 +294,16 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <GestionEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Ruta de ayuda */}
+        <Route
+          path={ROUTE_PATHS.HELP}
+          element={
+            <ProtectedRoute>
+              <HelpPage />
             </ProtectedRoute>
           }
         />

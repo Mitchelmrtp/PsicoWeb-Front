@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SessionService } from "@/services/SessionService";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
@@ -9,6 +10,7 @@ const SesionesPendientes = () => {
   const [sesiones, setSesiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const cargarSesiones = async () => {
     try {
@@ -26,19 +28,8 @@ const SesionesPendientes = () => {
     }
   };
 
-  const registrarAsistencia = async (sesionId) => {
-    try {
-      await sessionService.registerAttendance(sesionId, {
-        estado: "completada",
-        notas: "Sesión marcada como completada.",
-      });
-      toast.success("Asistencia registrada");
-      // Recargar sesiones
-      cargarSesiones();
-    } catch (error) {
-      toast.error("Error al registrar asistencia");
-      console.error(error);
-    }
+  const verDetalles = (sesionId) => {
+    navigate(`/citas/${sesionId}`);
   };
 
   useEffect(() => {
@@ -48,7 +39,7 @@ const SesionesPendientes = () => {
   if (loading) return <p>Cargando sesiones...</p>;
 
   if (!sesiones.length) {
-    return <p>No hay sesiones pendientes de asistencia.</p>;
+    return <p>No hay sesiones pendientes.</p>;
   }
 
   return (
@@ -75,10 +66,10 @@ const SesionesPendientes = () => {
               </p>
             </div>
             <button
-              onClick={() => registrarAsistencia(sesion.id)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+              onClick={() => verDetalles(sesion.id)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
             >
-              Registrar Asistencia
+              Ver Detalles
             </button>
           </li>
         ))}

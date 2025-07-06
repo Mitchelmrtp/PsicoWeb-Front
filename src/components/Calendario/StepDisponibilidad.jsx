@@ -347,6 +347,8 @@ const StepDisponibilidad = ({ psicologos = [], onNext }) => {
       onNext({
         psicologoId: selectedPsicologo,
         psicologoNombre: psicologoName,
+        tarifaPorSesion: psicologoData?.tarifaPorSesion || 50.00, // Incluir tarifa del psicólogo
+        psicologo: psicologoData, // Incluir objeto completo del psicólogo para referencia
         date: selectedDate,
         time: selectedTime,
         descripcion,

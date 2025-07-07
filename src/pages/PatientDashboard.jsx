@@ -20,7 +20,7 @@ const PatientDashboard = () => {
 
   const handleViewAppointmentDetails = (appointment) => {
     // Ver detalles de cita
-    // Implementar navegación a detalles de cita
+    navigate(`/citas/${appointment.id}`);
   };
 
   const handleViewAllAppointments = () => {

@@ -31,6 +31,21 @@ const ChatPage = lazy(() => import("../pages/ChatPage"));
 const MostrarInformes = lazy(() => import("../components/informes/MostrarInformes"));
 const GenerarInforme = lazy(() => import("../components/informes/GenerarInforme"));
 
+// Componentes de objetivos y emociones
+const ObjetivosPacienteContainer = lazy(() => import("../components/objetivos/ObjetivosPacienteContainer"));
+const MisObjetivosContainer = lazy(() => import("../components/objetivos/MisObjetivosContainer"));
+const RegistrarEmocionesPage = lazy(() => import("../pages/RegistrarEmocionesPage"));
+const MisEmocionesPage = lazy(() => import("../pages/MisEmocionesPage"));
+const GestionEmocionesPage = lazy(() => import("../pages/GestionEmocionesPage"));
+
+// Componentes de citas
+const CitaDetailPage = lazy(() => import("../pages/CitaDetailPage"));
+
+// Componente temporal para consultas online
+const ConsultasOnlinePage = lazy(() => import("../pages/ConsultasOnlinePage"));
+
+// Componente de ayuda
+const HelpPage = lazy(() => import("../pages/HelpPage"));
 
 // Componente de carga
 const LoadingSpinner = () => (
@@ -118,6 +133,14 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTE_PATHS.CHAT_DETAIL}
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Rutas de pruebas psicológicas */}
         <Route
@@ -193,6 +216,94 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <PacientesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.PACIENTE_DETAIL}
+          element={
+            <ProtectedRoute>
+              <PerfilPaciente />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de citas y sesiones */}
+        <Route
+          path={ROUTE_PATHS.CITA_DETAIL}
+          element={
+            <ProtectedRoute>
+              <CitaDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Ruta para consultas online */}
+        <Route
+          path={ROUTE_PATHS.CONSULTAS_ONLINE}
+          element={
+            <ProtectedRoute>
+              <ConsultasOnlinePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/consultas-online/:id"
+          element={
+            <ProtectedRoute>
+              <ConsultasOnlinePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rutas de objetivos y emociones */}
+        <Route
+          path={ROUTE_PATHS.OBJETIVOS_PACIENTE}
+          element={
+            <ProtectedRoute>
+              <ObjetivosPacienteContainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_OBJETIVOS}
+          element={
+            <ProtectedRoute>
+              <MisObjetivosContainer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.REGISTRAR_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <RegistrarEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.MIS_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <MisEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTE_PATHS.GESTION_EMOCIONES}
+          element={
+            <ProtectedRoute>
+              <GestionEmocionesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Ruta de ayuda */}
+        <Route
+          path={ROUTE_PATHS.HELP}
+          element={
+            <ProtectedRoute>
+              <HelpPage />
             </ProtectedRoute>
           }
         />

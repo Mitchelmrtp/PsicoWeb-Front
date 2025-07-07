@@ -6,6 +6,15 @@ import { es } from 'date-fns/locale';
 const StepDatosPago = ({ citaData, onBack, onConfirm, loading, onPaymentMethodChange }) => {
   const [paymentMethod, setPaymentMethod] = useState("tarjeta");
   
+  // Calcular costos dinámicamente basados en el psicólogo
+  const rawTarifa = citaData?.tarifaPorSesion || citaData?.psicologo?.tarifaPorSesion || 50.00;
+  console.log('StepDatosPago - citaData:', citaData);
+  console.log('StepDatosPago - rawTarifa:', rawTarifa, 'tipo:', typeof rawTarifa);
+  const tarifaBase = parseFloat(rawTarifa) || 50.00; // Asegurar que sea un número válido
+  const impuestos = tarifaBase * 0.10; // 10% de impuestos
+  const total = tarifaBase + impuestos;
+  console.log('StepDatosPago - tarifaBase calculada:', tarifaBase, 'impuestos:', impuestos, 'total:', total);
+  
   const formatDate = (date) => {
     if (!date) return '';
     return format(new Date(date), 'EEEE d MMMM yyyy', { locale: es });
@@ -21,7 +30,13 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading, onPaymentMethodCh
 
   // Handle submission with payment method
   const handleSubmit = () => {
-    onConfirm(paymentMethod);
+    const paymentData = {
+      method: paymentMethod,
+      monto: tarifaBase,
+      montoImpuestos: impuestos,
+      montoTotal: total
+    };
+    onConfirm(paymentData);
   };
 
   return (
@@ -110,17 +125,17 @@ const StepDatosPago = ({ citaData, onBack, onConfirm, loading, onPaymentMethodCh
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between py-2 border-b border-gray-200">
               <span>Sesión terapéutica (60 min)</span>
-              <span>$50.00</span>
+              <span>${(tarifaBase || 0).toFixed(2)}</span>
             </div>
             
             <div className="flex justify-between py-2 border-b border-gray-200">
-              <span>Impuestos</span>
-              <span>$5.00</span>
+              <span>Impuestos (10%)</span>
+              <span>${(impuestos || 0).toFixed(2)}</span>
             </div>
             
             <div className="flex justify-between py-3 font-bold">
               <span>Total</span>
-              <span>$55.00</span>
+              <span>${(total || 0).toFixed(2)}</span>
             </div>
           </div>
           

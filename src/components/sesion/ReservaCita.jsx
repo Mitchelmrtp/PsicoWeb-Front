@@ -136,7 +136,8 @@ const ReservaCita = () => {
   };
 
   // Handle final confirmation and create session in backend with payment integration
-  const handleConfirm = async (paymentMethod = selectedPaymentMethod) => {
+  const handleConfirm = async (paymentData) => {
+    const { method: paymentMethod, monto, montoImpuestos, montoTotal } = paymentData;
     try {
       // Validate user
       const userId = user?.userId || user?.id;
@@ -183,10 +184,10 @@ const ReservaCita = () => {
 
       // Prepare data for payment and session creation
       const requestData = {
-        // Payment data
-        monto: 50.00,
-        montoImpuestos: 5.00,
-        montoTotal: 55.00,
+        // Payment data - usando valores dinámicos del psicólogo
+        monto: monto,
+        montoImpuestos: montoImpuestos,
+        montoTotal: montoTotal,
         metodoPago: paymentMethod,
         descripcion: `Sesión con ${reservaData.psicologoNombre} - ${fecha} ${reservaData.time}`,
         // Session data

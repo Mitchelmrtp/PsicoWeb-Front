@@ -2,11 +2,10 @@ import { Card, Button } from "../ui";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-// Componente para mostrar lista de citas con botón de asistencia
+// Componente para mostrar lista de citas con botón de detalles
 const AppointmentCard = ({
   appointment,
   onViewDetails,
-  onRegisterAttendance, // ✅ NUEVA PROP
   showActions = true,
 }) => {
   const formatDate = (date) => {
@@ -65,21 +64,12 @@ const AppointmentCard = ({
 
         {showActions && (
           <div className="flex space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={() => onViewDetails?.(appointment)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
             >
               Ver Detalles
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onRegisterAttendance?.(appointment.id)}
-            >
-              Registrar Asistencia
-            </Button>
+            </button>
           </div>
         )}
       </div>

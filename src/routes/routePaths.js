@@ -44,6 +44,10 @@ export const ROUTE_PATHS = {
   PACIENTES: "/pacientes",
   PACIENTE_DETAIL: "/pacientes/:id",
   
+  // Citas y sesiones
+  CITA_DETAIL: "/citas/:id",
+  CITA_EDIT: "/citas/:id/editar",
+  
   // Funcionalidades adicionales
   HELP: "/help",
   CALENDARIO: "/calendario",
@@ -96,7 +100,6 @@ export const NAVIGATION_ROUTES = {
   PSYCHOLOGIST: [
     { path: ROUTE_PATHS.DASHBOARD, label: "Dashboard", icon: "dashboard" },
     { path: ROUTE_PATHS.PACIENTES, label: "Pacientes", icon: "patients" },
-    { path: ROUTE_PATHS.OBJETIVOS_PACIENTE, label: "Objetivos del Paciente", icon: "target" },
     { path: ROUTE_PATHS.GESTION_EMOCIONES, label: "Gestión de Emociones", icon: "emotion" },
     { path: ROUTE_PATHS.DISPONIBILIDAD, label: "Mi disponibilidad", icon: "availability" },
     { path: ROUTE_PATHS.CONSULTAS, label: "Mis consultas", icon: "consultation" },

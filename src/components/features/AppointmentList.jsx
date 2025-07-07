@@ -11,7 +11,6 @@ const AppointmentList = ({
   onViewDetails,
   showViewAll = false,
   onViewAll,
-  onRegisterAttendance,
 }) => {
   // Agrupar citas por mes para mejor organización
   const groupedAppointments = appointments.reduce((acc, appointment) => {
@@ -115,7 +114,6 @@ const AppointmentList = ({
                         key={appointment.id}
                         appointment={appointment}
                         onViewDetails={onViewDetails}
-                        onRegisterAttendance={onRegisterAttendance}
                       />
                     ))}
                   </div>

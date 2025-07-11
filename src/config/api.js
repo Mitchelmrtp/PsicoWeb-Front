@@ -1,7 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net';
+const API_URL = import.meta.env.VITE_API_URL || 'https://mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net/api';
 
 export const ENDPOINTS = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net',
+  BASE_URL: import.meta.env.VITE_API_URL || 'https://mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net/api',
   LOGIN: `${API_URL}/login`,
   REGISTER: `${API_URL}/register`,
   PROFILE: `${API_URL}/profile`,

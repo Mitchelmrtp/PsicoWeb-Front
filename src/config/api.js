@@ -1,7 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
+const API_URL = import.meta.env.VITE_API_URL || 'mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net';
 
 export const ENDPOINTS = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3005/api',
+  BASE_URL: import.meta.env.VITE_API_URL || 'mitchelmrtp-20251-soft2-api2-h4hkdvccfhcte3h6.eastus2-01.azurewebsites.net',
   LOGIN: `${API_URL}/login`,
   REGISTER: `${API_URL}/register`,
   PROFILE: `${API_URL}/profile`,
